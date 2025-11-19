@@ -15,7 +15,11 @@ import jogo.engine.GameRegistry;
 import jogo.engine.RenderIndex;
 import jogo.framework.math.Vec3;
 import jogo.gameobject.GameObject;
+import jogo.gameobject.Wood;
 import jogo.gameobject.character.Player;
+import jogo.gameobject.character.Character;
+import jogo.gameobject.character.Ally;
+import jogo.gameobject.character.Enemy;
 import jogo.gameobject.item.Item;
 
 import java.util.HashMap;
@@ -87,9 +91,21 @@ public class RenderAppState extends BaseAppState {
             Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
             g.setMaterial(colored(ColorRGBA.Green));
             return g;
-        } else if (obj instanceof Item) {
+        } else if (obj instanceof Enemy) {
+            Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
+            g.setMaterial(colored(ColorRGBA.Red));
+            return g;
+        } else if (obj instanceof Ally) {
+            Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
+            g.setMaterial(colored(ColorRGBA.Blue));
+            return g;
+        } else if (obj instanceof Wood) {
             Geometry g = new Geometry(obj.getName(), new Box(0.3f, 0.3f, 0.3f));
             g.setMaterial(colored(ColorRGBA.Yellow));
+            return g;
+        } else if (obj instanceof Item) {
+            Geometry g = new Geometry(obj.getName(), new Box(0.3f, 0.3f, 0.3f));
+            g.setMaterial(colored(ColorRGBA.White));
             return g;
         }
         return null;

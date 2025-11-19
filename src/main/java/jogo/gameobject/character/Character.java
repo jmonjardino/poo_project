@@ -15,10 +15,40 @@ public abstract class Character extends GameObject {
     }
 
     // Example state hooks students can extend
+    /** Valor atual de saúde. */
     private int health = 100;
+    /** Valor máximo de saúde. */
+    private final int maxHealth = 100;
 
     /** Valor atual de saúde. */
     public int getHealth() { return health; }
-    /** Define o valor de saúde. */
-    public void setHealth(int health) { this.health = health; }
+    /**
+     * Devolve o valor máximo de saúde configurado para a personagem.
+     * Este valor define o limite superior aplicado em {@link #setHealth(int)}.
+     */
+    public int getMaxHealth() { return maxHealth; }
+    /**
+     * Define o valor de saúde, garantindo as invariantes do estado.
+     * O valor é cortado para o intervalo [0, {@link #getMaxHealth()}].
+     * Valores negativos tornam a saúde 0; valores acima do máximo tornam a saúde igual a {@link #getMaxHealth()}.
+     * @param health novo valor de saúde pretendido
+     */
+    public void setHealth(int health) { this.health = Math.max(0, Math.min(health, maxHealth)); }
+    /**
+     * Indica se a personagem está viva.
+     * @return {@code true} se a saúde atual for maior que 0; caso contrário {@code false}
+     */
+    public boolean isAlive() { return health > 0; }
+    /**
+     * Aplica dano positivo à personagem, reduzindo a saúde atual.
+     * Valores menores ou iguais a zero são ignorados. O corte de limites é garantido por {@link #setHealth(int)}.
+     * @param amount quantidade de dano a aplicar (deve ser positiva)
+     */
+    public void takeDamage(int amount) { if (amount > 0) setHealth(health - amount); }
+    /**
+     * Aplica cura positiva à personagem, aumentando a saúde atual.
+     * Valores menores ou iguais a zero são ignorados. O corte de limites é garantido por {@link #setHealth(int)}.
+     * @param amount quantidade de cura a aplicar (deve ser positiva)
+     */
+    public void heal(int amount) { if (amount > 0) setHealth(health + amount); }
 }

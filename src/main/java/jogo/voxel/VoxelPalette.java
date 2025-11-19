@@ -3,6 +3,8 @@ package jogo.voxel;
 import jogo.voxel.blocks.AirBlockType;
 import jogo.voxel.blocks.StoneBlockType;
 import jogo.voxel.blocks.WoodBlockType;
+import jogo.voxel.blocks.DirtBlockType;
+import jogo.voxel.blocks.SandBlockType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,27 +15,35 @@ public class VoxelPalette {
     public byte register(VoxelBlockType type) {
         types.add(type);
         int id = types.size() - 1;
-        if (id > 255) throw new IllegalStateException("Too many voxel block types (>255)");
+        if (id > 255)
+            throw new IllegalStateException("Too many voxel block types (>255)");
         return (byte) id;
     }
 
     public VoxelBlockType get(byte id) {
         int idx = Byte.toUnsignedInt(id);
-        if (idx < 0 || idx >= types.size()) return new AirBlockType();
+        if (idx < 0 || idx >= types.size())
+            return new AirBlockType();
         return types.get(idx);
     }
 
-    public int size() { return types.size(); }
+    public int size() {
+        return types.size();
+    }
 
     public static VoxelPalette defaultPalette() {
         VoxelPalette p = new VoxelPalette();
-        p.register(new AirBlockType());   // id 0
+        p.register(new AirBlockType()); // id 0
         p.register(new StoneBlockType()); // id 1
-        p.register(new WoodBlockType());  // id 2
+        p.register(new WoodBlockType()); // id 2
+        p.register(new DirtBlockType()); // id 3
+        p.register(new SandBlockType()); // id 4
         return p;
     }
 
     public static final byte AIR_ID = 0;
     public static final byte STONE_ID = 1;
     public static final byte WOOD_ID = 2;
+    public static final byte DIRT_ID = 3;
+    public static final byte SAND_ID = 4;
 }

@@ -27,9 +27,9 @@ public class VoxelWorld {
     private final Map<Byte, Geometry> geoms = new HashMap<>();
     private final Map<Byte, Material> materials = new HashMap<>();
 
-    private boolean lit = true;       // Shading: On by default
+    private boolean lit = true; // Shading: On by default
     private boolean wireframe = false; // Wireframe: Off by default
-    private boolean culling = true;   // Culling: On by default
+    private boolean culling = true; // Culling: On by default
     private int groundHeight = 8; // baseline Y level
 
     private final int chunkSize = Chunk.SIZE;
@@ -42,9 +42,9 @@ public class VoxelWorld {
         this.sizeY = sizeY;
         this.sizeZ = sizeZ;
         this.palette = VoxelPalette.defaultPalette();
-        this.chunkCountX = (int)Math.ceil(sizeX / (float)chunkSize);
-        this.chunkCountY = (int)Math.ceil(sizeY / (float)chunkSize);
-        this.chunkCountZ = (int)Math.ceil(sizeZ / (float)chunkSize);
+        this.chunkCountX = (int) Math.ceil(sizeX / (float) chunkSize);
+        this.chunkCountY = (int) Math.ceil(sizeY / (float) chunkSize);
+        this.chunkCountZ = (int) Math.ceil(sizeZ / (float) chunkSize);
         this.chunks = new Chunk[chunkCountX][chunkCountY][chunkCountZ];
         for (int cx = 0; cx < chunkCountX; cx++)
             for (int cy = 0; cy < chunkCountY; cy++)
@@ -58,49 +58,71 @@ public class VoxelWorld {
         int cx = x / chunkSize;
         int cy = y / chunkSize;
         int cz = z / chunkSize;
-        if (cx < 0 || cy < 0 || cz < 0 || cx >= chunkCountX || cy >= chunkCountY || cz >= chunkCountZ) return null;
+        if (cx < 0 || cy < 0 || cz < 0 || cx >= chunkCountX || cy >= chunkCountY || cz >= chunkCountZ)
+            return null;
         return chunks[cx][cy][cz];
     }
-    private int lx(int x) { return x % chunkSize; }
-    private int ly(int y) { return y % chunkSize; }
-    private int lz(int z) { return z % chunkSize; }
+
+    private int lx(int x) {
+        return x % chunkSize;
+    }
+
+    private int ly(int y) {
+        return y % chunkSize;
+    }
+
+    private int lz(int z) {
+        return z % chunkSize;
+    }
 
     // Block access
     public byte getBlock(int x, int y, int z) {
         Chunk c = getChunk(x, y, z);
-        if (c == null) return VoxelPalette.AIR_ID;
-        if (!inBounds(x,y,z)) return VoxelPalette.AIR_ID;
+        if (c == null)
+            return VoxelPalette.AIR_ID;
+        if (!inBounds(x, y, z))
+            return VoxelPalette.AIR_ID;
         return c.get(lx(x), ly(y), lz(z));
     }
+
     public void setBlock(int x, int y, int z, byte id) {
         Chunk c = getChunk(x, y, z);
         if (c != null) {
             c.set(lx(x), ly(y), lz(z), id);
             c.markDirty();
             // If on chunk edge, mark neighbor dirty
-            if (lx(x) == 0) markNeighborChunkDirty(x-1, y, z);
-            if (lx(x) == chunkSize-1) markNeighborChunkDirty(x+1, y, z);
-            if (ly(y) == 0) markNeighborChunkDirty(x, y-1, z);
-            if (ly(y) == chunkSize-1) markNeighborChunkDirty(x, y+1, z);
-            if (lz(z) == 0) markNeighborChunkDirty(x, y, z-1);
-            if (lz(z) == chunkSize-1) markNeighborChunkDirty(x, y, z+1);
+            if (lx(x) == 0)
+                markNeighborChunkDirty(x - 1, y, z);
+            if (lx(x) == chunkSize - 1)
+                markNeighborChunkDirty(x + 1, y, z);
+            if (ly(y) == 0)
+                markNeighborChunkDirty(x, y - 1, z);
+            if (ly(y) == chunkSize - 1)
+                markNeighborChunkDirty(x, y + 1, z);
+            if (lz(z) == 0)
+                markNeighborChunkDirty(x, y, z - 1);
+            if (lz(z) == chunkSize - 1)
+                markNeighborChunkDirty(x, y, z + 1);
         }
     }
 
     private void markNeighborChunkDirty(int x, int y, int z) {
         Chunk n = getChunk(x, y, z);
-        if (n != null) n.markDirty();
+        if (n != null)
+            n.markDirty();
     }
 
     public boolean breakAt(int x, int y, int z) {
-        if (!inBounds(x,y,z)) return false;
+        if (!inBounds(x, y, z))
+            return false;
         setBlock(x, y, z, VoxelPalette.AIR_ID);
         return true;
     }
 
-    public Node getNode() { return node; }
+    public Node getNode() {
+        return node;
+    }
 
-    
     public void generateLayers() {
         int cx = sizeX / 2;
         int cz = sizeZ / 2;
@@ -108,12 +130,20 @@ public class VoxelWorld {
         for (int dz = -8; dz <= 8; dz++) {
             setBlock(cx, y, cz + dz, VoxelPalette.WOOD_ID);
         }
+        for (int dx = -8; dx <= 8; dx++) {
+            setBlock(cx + dx, y, cz - 10, VoxelPalette.DIRT_ID);
+        }
+        for (int dx = -8; dx <= 8; dx++) {
+            setBlock(cx + dx, y, cz + 10, VoxelPalette.SAND_ID);
+        }
     }
 
     public int getTopSolidY(int x, int z) {
-        if (x < 0 || z < 0 || x >= sizeX || z >= sizeZ) return -1;
+        if (x < 0 || z < 0 || x >= sizeX || z >= sizeZ)
+            return -1;
         for (int y = sizeY - 1; y >= 0; y--) {
-            if (palette.get(getBlock(x, y, z)).isSolid()) return y;
+            if (palette.get(getBlock(x, y, z)).isSolid())
+                return y;
         }
         return -1;
     }
@@ -122,7 +152,8 @@ public class VoxelWorld {
         int cx = sizeX / 2;
         int cz = sizeZ / 2;
         int ty = getTopSolidY(cx, cz);
-        if (ty < 0) ty = groundHeight;
+        if (ty < 0)
+            ty = groundHeight;
         return new Vector3f(cx + 0.5f, ty + 3.0f, cz + 0.5f);
     }
 
@@ -144,7 +175,8 @@ public class VoxelWorld {
     }
 
     private void applyRenderFlags(Material m) {
-        m.getAdditionalRenderState().setFaceCullMode(culling ? RenderState.FaceCullMode.Back : RenderState.FaceCullMode.Off);
+        m.getAdditionalRenderState()
+                .setFaceCullMode(culling ? RenderState.FaceCullMode.Back : RenderState.FaceCullMode.Off);
         m.getAdditionalRenderState().setWireframe(wireframe);
     }
 
@@ -163,7 +195,8 @@ public class VoxelWorld {
 
     public void buildPhysics(PhysicsSpace space) {
         // Build per-chunk static rigid bodies instead of a single world body
-        if (space == null) return;
+        if (space == null)
+            return;
         for (int cx = 0; cx < chunkCountX; cx++) {
             for (int cy = 0; cy < chunkCountY; cy++) {
                 for (int cz = 0; cz < chunkCountZ; cz++) {
@@ -174,71 +207,81 @@ public class VoxelWorld {
         }
     }
 
-    public Optional<Hit> pickFirstSolid(Camera cam, float maxDistance)  {
-        Vector3f origin =  cam.getLocation();
-        Vector3f dir =  cam.getDirection().normalize();
+    public Optional<Hit> pickFirstSolid(Camera cam, float maxDistance) {
+        Vector3f origin = cam.getLocation();
+        Vector3f dir = cam.getDirection().normalize();
 
-        int x = (int ) Math.floor(origin.x);
-        int y = (int ) Math.floor(origin.y);
-        int z = (int ) Math.floor(origin.z);
+        int x = (int) Math.floor(origin.x);
+        int y = (int) Math.floor(origin.y);
+        int z = (int) Math.floor(origin.z);
 
-        float  tMaxX, tMaxY, tMaxZ;
-        float  tDeltaX, tDeltaY, tDeltaZ;
-        int stepX = dir.x > 0 ? 1 : -1 ;
-        int stepY = dir.y > 0 ? 1 : -1 ;
-        int stepZ = dir.z > 0 ? 1 : -1 ;
+        float tMaxX, tMaxY, tMaxZ;
+        float tDeltaX, tDeltaY, tDeltaZ;
+        int stepX = dir.x > 0 ? 1 : -1;
+        int stepY = dir.y > 0 ? 1 : -1;
+        int stepZ = dir.z > 0 ? 1 : -1;
 
-        float nextVoxelBoundaryX = x + (stepX > 0 ? 1 : 0 );
-        float nextVoxelBoundaryY = y + (stepY > 0 ? 1 : 0 );
-        float nextVoxelBoundaryZ = z + (stepZ > 0 ? 1 : 0 );
+        float nextVoxelBoundaryX = x + (stepX > 0 ? 1 : 0);
+        float nextVoxelBoundaryY = y + (stepY > 0 ? 1 : 0);
+        float nextVoxelBoundaryZ = z + (stepZ > 0 ? 1 : 0);
 
-        tMaxX = (dir.x != 0 ) ? (nextVoxelBoundaryX - origin.x) / dir.x : Float.POSITIVE_INFINITY;
-        tMaxY = (dir.y != 0 ) ? (nextVoxelBoundaryY - origin.y) / dir.y : Float.POSITIVE_INFINITY;
-        tMaxZ = (dir.z != 0 ) ? (nextVoxelBoundaryZ - origin.z) / dir.z : Float.POSITIVE_INFINITY;
+        tMaxX = (dir.x != 0) ? (nextVoxelBoundaryX - origin.x) / dir.x : Float.POSITIVE_INFINITY;
+        tMaxY = (dir.y != 0) ? (nextVoxelBoundaryY - origin.y) / dir.y : Float.POSITIVE_INFINITY;
+        tMaxZ = (dir.z != 0) ? (nextVoxelBoundaryZ - origin.z) / dir.z : Float.POSITIVE_INFINITY;
 
-        tDeltaX = (dir.x != 0 ) ? stepX / dir.x : Float.POSITIVE_INFINITY;
-        tDeltaY = (dir.y != 0 ) ? stepY / dir.y : Float.POSITIVE_INFINITY;
-        tDeltaZ = (dir.z != 0 ) ? stepZ / dir.z : Float.POSITIVE_INFINITY;
+        tDeltaX = (dir.x != 0) ? stepX / dir.x : Float.POSITIVE_INFINITY;
+        tDeltaY = (dir.y != 0) ? stepY / dir.y : Float.POSITIVE_INFINITY;
+        tDeltaZ = (dir.z != 0) ? stepZ / dir.z : Float.POSITIVE_INFINITY;
 
-        float t = 0f ;
-        if  (inBounds(x,y,z) && isSolid(x,y,z)) {
-            return Optional.of(new Hit(new Vector3i(x,y,z), new Vector3f(0,0,0), 0f ));
+        float t = 0f;
+        if (inBounds(x, y, z) && isSolid(x, y, z)) {
+            return Optional.of(new Hit(new Vector3i(x, y, z), new Vector3f(0, 0, 0), 0f));
         }
 
-        Vector3f lastNormal = new Vector3f(0,0,0 );
+        Vector3f lastNormal = new Vector3f(0, 0, 0);
 
-        while  (t <= maxDistance) {
-            if  (tMaxX < tMaxY) {
-                if  (tMaxX < tMaxZ) {
-                    x += stepX; t = tMaxX; tMaxX += tDeltaX;
-                    lastNormal.set(-stepX, 0, 0 );
-                } else  {
-                    z += stepZ; t = tMaxZ; tMaxZ += tDeltaZ;
-                    lastNormal.set(0, 0 , -stepZ);
+        while (t <= maxDistance) {
+            if (tMaxX < tMaxY) {
+                if (tMaxX < tMaxZ) {
+                    x += stepX;
+                    t = tMaxX;
+                    tMaxX += tDeltaX;
+                    lastNormal.set(-stepX, 0, 0);
+                } else {
+                    z += stepZ;
+                    t = tMaxZ;
+                    tMaxZ += tDeltaZ;
+                    lastNormal.set(0, 0, -stepZ);
                 }
-            } else  {
-                if  (tMaxY < tMaxZ) {
-                    y += stepY; t = tMaxY; tMaxY += tDeltaY;
-                    lastNormal.set(0, -stepY, 0 );
-                } else  {
-                    z += stepZ; t = tMaxZ; tMaxZ += tDeltaZ;
-                    lastNormal.set(0, 0 , -stepZ);
+            } else {
+                if (tMaxY < tMaxZ) {
+                    y += stepY;
+                    t = tMaxY;
+                    tMaxY += tDeltaY;
+                    lastNormal.set(0, -stepY, 0);
+                } else {
+                    z += stepZ;
+                    t = tMaxZ;
+                    tMaxZ += tDeltaZ;
+                    lastNormal.set(0, 0, -stepZ);
                 }
             }
 
-            if  (!inBounds(x,y,z)) {
-                if (t > maxDistance) break ;
-                continue ;
+            if (!inBounds(x, y, z)) {
+                if (t > maxDistance)
+                    break;
+                continue;
             }
-            if  (isSolid(x,y,z)) {
-                return Optional.of(new Hit(new Vector3i (x,y,z), lastNormal.clone(), t));
+            if (isSolid(x, y, z)) {
+                return Optional.of(new Hit(new Vector3i(x, y, z), lastNormal.clone(), t));
             }
         }
-        return  Optional.empty();
+        return Optional.empty();
     }
 
     private boolean isSolid(int x, int y, int z) {
-        if (!inBounds(x,y,z)) return false;
+        if (!inBounds(x, y, z))
+            return false;
         return palette.get(getBlock(x, y, z)).isSolid();
     }
 
@@ -247,25 +290,29 @@ public class VoxelWorld {
     }
 
     public void setLit(boolean lit) {
-        if (this.lit == lit) return;
+        if (this.lit == lit)
+            return;
         this.lit = lit;
         for (var e : geoms.entrySet()) {
             Geometry g = e.getValue();
             var oldMat = g.getMaterial();
             com.jme3.texture.Texture tex = oldMat.getTextureParam("DiffuseMap") != null
                     ? oldMat.getTextureParam("DiffuseMap").getTextureValue()
-                    : (oldMat.getTextureParam("ColorMap") != null ? oldMat.getTextureParam("ColorMap").getTextureValue() : null);
+                    : (oldMat.getTextureParam("ColorMap") != null ? oldMat.getTextureParam("ColorMap").getTextureValue()
+                            : null);
             Material newMat;
             if (this.lit) {
                 newMat = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-                if (tex != null) newMat.setTexture("DiffuseMap", tex);
+                if (tex != null)
+                    newMat.setTexture("DiffuseMap", tex);
                 newMat.setBoolean("UseMaterialColors", true);
                 newMat.setColor("Diffuse", ColorRGBA.White);
                 newMat.setColor("Specular", ColorRGBA.White.mult(0.08f));
                 newMat.setFloat("Shininess", 16f);
             } else {
                 newMat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-                if (tex != null) newMat.setTexture("ColorMap", tex);
+                if (tex != null)
+                    newMat.setTexture("ColorMap", tex);
             }
             applyRenderFlags(newMat);
             g.setMaterial(newMat);
@@ -273,21 +320,33 @@ public class VoxelWorld {
     }
 
     public void setWireframe(boolean wireframe) {
-        if (this.wireframe == wireframe) return;
+        if (this.wireframe == wireframe)
+            return;
         this.wireframe = wireframe;
 
-        for (Geometry g : geoms.values()) applyRenderFlags(g.getMaterial());
+        for (Geometry g : geoms.values())
+            applyRenderFlags(g.getMaterial());
     }
 
     public void setCulling(boolean culling) {
-        if (this.culling == culling) return;
+        if (this.culling == culling)
+            return;
         this.culling = culling;
-        for (Geometry g : geoms.values()) applyRenderFlags(g.getMaterial());
+        for (Geometry g : geoms.values())
+            applyRenderFlags(g.getMaterial());
     }
 
-    public boolean isLit() { return lit; }
-    public boolean isWireframe() { return wireframe; }
-    public boolean isCulling() { return culling; }
+    public boolean isLit() {
+        return lit;
+    }
+
+    public boolean isWireframe() {
+        return wireframe;
+    }
+
+    public boolean isCulling() {
+        return culling;
+    }
 
     public void toggleRenderDebug() {
         System.out.println("Toggled render debug");
@@ -296,14 +355,17 @@ public class VoxelWorld {
         setCulling(!isCulling());
     }
 
-    public int getGroundHeight() { return groundHeight; }
+    public int getGroundHeight() {
+        return groundHeight;
+    }
 
     public VoxelPalette getPalette() {
         return palette;
     }
 
     /**
-     * Rebuilds meshes only for dirty chunks. Call this once per frame in your update loop.
+     * Rebuilds meshes only for dirty chunks. Call this once per frame in your
+     * update loop.
      */
     public void rebuildDirtyChunks(PhysicsSpace physicsSpace) {
         int rebuilt = 0;
@@ -321,7 +383,8 @@ public class VoxelWorld {
                 }
             }
         }
-        if (rebuilt > 0) System.out.println("Chunks rebuilt this frame: " + rebuilt);
+        if (rebuilt > 0)
+            System.out.println("Chunks rebuilt this frame: " + rebuilt);
         if (rebuilt > 0 && physicsSpace != null) {
             physicsSpace.update(0); // Force physics space to process changes
             System.out.println("Physics space forced update after chunk physics changes.");
@@ -341,7 +404,12 @@ public class VoxelWorld {
     // simple int3
     public static class Vector3i {
         public final int x, y, z;
-        public Vector3i(int x, int y, int z) { this.x=x; this.y=y; this.z=z; }
+
+        public Vector3i(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
 
         public Vector3i(Vector3f vec3f) {
             this.x = (int) vec3f.x;

@@ -16,6 +16,8 @@ import jogo.engine.GameRegistry;
 import jogo.gameobject.Wood;
 import jogo.gameobject.item.BreakableItem;
 import jogo.engine.RenderIndex;
+import jogo.gameobject.character.Enemy;
+import jogo.gameobject.character.Ally;
 
 /**
  * Main application entry.
@@ -75,12 +77,20 @@ public class Jogo extends SimpleApplication {
         // and keeps items close to the player's starting area.
 
         BreakableItem axe = new BreakableItem("Axe", 100, 100, "Axe", "Basic", 1.0);
-        axe.setPosition(163, 13, 161);
+        axe.setPosition(163, 10, 161);
         registry.add(axe);
 
         Wood woodTeste = new Wood("Test Wood", 100, "Oak");
         woodTeste.setPosition(158, 10, 161);
         registry.add(woodTeste);
+
+        Enemy enemy = new Enemy("Enemy");
+        enemy.setPosition(163, 13, 163);
+        registry.add(enemy);
+
+        Ally ally = new Ally("Ally", "Guard", 10);
+        ally.setPosition(163, 13, 165);
+        registry.add(ally);
 
         // Post-processing: SSAO for subtle contact shadows
         try {

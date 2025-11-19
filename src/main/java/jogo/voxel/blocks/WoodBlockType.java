@@ -13,6 +13,10 @@ public class WoodBlockType extends VoxelBlockType {
         super("wood");
     }
 
+    public float getHardness() {
+        return 1.2f;
+    }
+
     @Override
     public Material getMaterial(AssetManager assetManager) {
         Texture2D tex = ProcTextures.checker(128, 6,
