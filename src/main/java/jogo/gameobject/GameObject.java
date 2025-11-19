@@ -3,8 +3,8 @@ package jogo.gameobject;
 import jogo.framework.math.Vec3;
 
 /**
- * Engine-neutral base for all game objects used by students.
- * Stores only identity and logical position; rendering/physics is handled by engine AppStates.
+ * Base neutra em relação ao motor para todos os objetos de jogo usados pelos estudantes.
+ * Guarda apenas a identidade e a posição lógica; a renderização/física é tratada pelos AppStates do motor.
  */
 public abstract class GameObject {
     protected final String name;

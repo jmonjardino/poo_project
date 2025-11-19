@@ -94,6 +94,11 @@ public class PlayerAppState extends BaseAppState {
             respawn();
         }
 
+        if (input.consumePrintCoordsRequested()) {
+            Vector3f loc = cam.getLocation();
+            System.out.println("Coords: " + loc.x + ", " + loc.y + ", " + loc.z);
+        }
+
         // pause controls if mouse not captured
         if (!input.isMouseCaptured()) {
             characterControl.setWalkDirection(Vector3f.ZERO);

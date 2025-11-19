@@ -49,7 +49,10 @@ public class Jogo extends SimpleApplication {
         bulletAppState.setDebugEnabled(false); // toggle off later
         PhysicsSpace physicsSpace = bulletAppState.getPhysicsSpace();
 
-        // AppStates (order matters a bit: input -> world -> render -> interaction -> player)
+        // AppStates (order matters a bit: input -> world -> render -> interaction ->
+        // player)
+        // Order ensures input is available, world is initialized before spawn queries,
+        // and render/interaction can index registered objects.
         InputAppState input = new InputAppState();
         stateManager.attach(input);
 
@@ -62,17 +65,22 @@ public class Jogo extends SimpleApplication {
         stateManager.attach(new RenderAppState(rootNode, assetManager, registry, renderIndex));
         stateManager.attach(new InteractionAppState(rootNode, cam, input, renderIndex, world));
 
-        // Demo objects
-        BreakableItem axe = new BreakableItem("Axe", 100, 100, "Axe", "Basic", 1.0);
-        axe.setPosition(world.getRecommendedSpawnPosition().x, world.getRecommendedSpawnPosition().y + 3.3f, world.getRecommendedSpawnPosition().z);
-        registry.add(axe);
-
-        Wood woodTeste = new Wood("Test Wood", 100, "Oak");
-        woodTeste.setPosition(world.getRecommendedSpawnPosition().x, world.getRecommendedSpawnPosition().y + 2.3f, world.getRecommendedSpawnPosition().z);
-        registry.add(woodTeste);
+        // Demo objects moved below after player attached
 
         PlayerAppState player = new PlayerAppState(rootNode, assetManager, cam, input, physicsSpace, world);
         stateManager.attach(player);
+
+        // Place demo items AFTER player attach using a single spawn reference.
+        // This avoids using a fallback spawn before the world is fully initialized
+        // and keeps items close to the player's starting area.
+
+        BreakableItem axe = new BreakableItem("Axe", 100, 100, "Axe", "Basic", 1.0);
+        axe.setPosition(163, 13, 161);
+        registry.add(axe);
+
+        Wood woodTeste = new Wood("Test Wood", 100, "Oak");
+        woodTeste.setPosition(158, 10, 161);
+        registry.add(woodTeste);
 
         // Post-processing: SSAO for subtle contact shadows
         try {
@@ -81,7 +89,8 @@ public class Jogo extends SimpleApplication {
             Object ssao = ssaoCls.getConstructor(float.class, float.class, float.class, float.class)
                     .newInstance(2.1f, 0.6f, 0.5f, 0.02f); // radius, intensity, scale, bias
             // Add filter via reflection to avoid compile-time dependency
-            java.lang.reflect.Method addFilter = FilterPostProcessor.class.getMethod("addFilter", Class.forName("com.jme3.post.Filter"));
+            java.lang.reflect.Method addFilter = FilterPostProcessor.class.getMethod("addFilter",
+                    Class.forName("com.jme3.post.Filter"));
             addFilter.invoke(fpp, ssao);
             viewPort.addProcessor(fpp);
         } catch (Exception e) {

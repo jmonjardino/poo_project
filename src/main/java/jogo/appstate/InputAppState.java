@@ -21,6 +21,7 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     private volatile boolean toggleShadingRequested;
     private volatile boolean respawnRequested;
     private volatile boolean interactRequested;
+    private volatile boolean printCoordsRequested;
     private float mouseDX, mouseDY;
     private boolean mouseCaptured = true;
 
@@ -49,8 +50,10 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.addMapping("Respawn", new KeyTrigger(KeyInput.KEY_R));
         // Interact (E)
         im.addMapping("Interact", new KeyTrigger(KeyInput.KEY_E));
+        // Print coordinates (O)
+        im.addMapping("PrintCoords", new KeyTrigger(KeyInput.KEY_O));
 
-        im.addListener(this, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight", "Jump", "Sprint", "ToggleMouse", "Break", "ToggleShading", "Respawn", "Interact");
+        im.addListener(this, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight", "Jump", "Sprint", "ToggleMouse", "Break", "ToggleShading", "Respawn", "Interact", "PrintCoords");
         im.addListener(this, "MouseX+", "MouseX-", "MouseY+", "MouseY-");
     }
 
@@ -108,6 +111,9 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
             }
             case "Interact" -> {
                 if (isPressed && mouseCaptured) interactRequested = true;
+            }
+            case "PrintCoords" -> {
+                if (isPressed) printCoordsRequested = true;
             }
         }
     }
@@ -181,5 +187,11 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
 
     public boolean isMouseCaptured() {
         return mouseCaptured;
+    }
+
+    public boolean consumePrintCoordsRequested() {
+        boolean r = printCoordsRequested;
+        printCoordsRequested = false;
+        return r;
     }
 }

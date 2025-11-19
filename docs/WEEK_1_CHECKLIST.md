@@ -43,22 +43,27 @@ Goal: get the project building and running, define a few game‑layer classes (e
 - Interaction: `src/main/java/jogo/appstate/InteractionAppState.java` (routes `E` to `Item.onInteract()` and exposes voxel pick)
 
 ## Week 1 Tasks
-1) Read the engine docs
+## DONE
+1) Read the engine docs 
 - `docs/ENGINE.md` (or `docs/ENGINE_PT.md`). Note: student classes must be engine‑neutral (no jME imports).
 
+## DONE 
 2) Run the project end‑to‑end
 - Confirm the window opens and you can move, jump, and toggle mouse capture.
 - If display creation fails on macOS, add `-XstartOnFirstThread` and retry.
 
+## DONE
 3) Create 2–3 concrete game‑layer classes
 - Under `src/main/java/jogo/gameobject/*` create classes extending your base hierarchy (e.g., `Item`, `Terrain`, `Character`).
 - Add fields, constructors, getters/setters, `toString()` (and `equals()/hashCode()` if useful).
 - Keep them engine‑neutral: store only state/logic (e.g., name, position as logical vector, stats), no jME types.
 
+## DONE
 4) Register 1 object for rendering/interaction
 - Use the provided `GameRegistry` in `Jogo.simpleInitApp()` to add one object instance so you can see it in the scene.
 - Validate picking of items via `E` prints a log (see `InteractionAppState`).
 
+## DONE
 5) Terrain visibility sanity check
 - In `VoxelWorld.generateLayers()`, place a simple strip/plate of `STONE` near spawn to verify voxel rendering (temporary for Week 1).
 - Rebuild meshes/physics is handled at init; later edits use `rebuildDirtyChunks(...)`.
