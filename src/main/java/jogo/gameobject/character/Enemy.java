@@ -1,10 +1,15 @@
 package jogo.gameobject.character;
+import jogo.framework.math.Vec3;
+import jogo.gameobject.capability.AIContext;
+import jogo.gameobject.capability.HasAI;
 
 /**
  * Entidade inimiga neutra em relação ao motor.
  * Mantém um atributo de força e expõe um dano de ataque simples.
  */
 public class Enemy extends Character {
+    /** Contexto de execução para a IA do inimigo. */
+
     /** Força base do inimigo usada para calcular dano de ataque. */
     private int strength = 10;
 
@@ -31,6 +36,7 @@ public class Enemy extends Character {
      * @return valor de dano
      */
     public int attackDamage() { return strength; }
+
 
     @Override
     public String toString() {

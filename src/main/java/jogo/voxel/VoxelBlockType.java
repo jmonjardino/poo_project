@@ -17,6 +17,13 @@ public abstract class VoxelBlockType {
     /** Whether this block is physically solid (collides/occludes). */
     public boolean isSolid() { return true; }
 
+    /**
+     * Relative resistance to breaking or mining for this block type.
+     * Unitless value used by game logic to scale tool effectiveness and break time.
+     * Typical range: softer materials &lt; 1.0, woods around ~1.0, hard stone &gt; 2.0.
+     * Defaults to 1.0.
+     * @return hardness value (non-negative)
+     */
     public float getHardness() { return 1.0f; }
 
     /**

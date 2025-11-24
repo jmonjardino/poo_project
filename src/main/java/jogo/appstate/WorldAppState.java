@@ -11,6 +11,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
+import jogo.engine.GameRegistry;
 import jogo.voxel.VoxelWorld;
 
 public class WorldAppState extends BaseAppState {
@@ -27,7 +28,7 @@ public class WorldAppState extends BaseAppState {
     private VoxelWorld voxelWorld;
     private com.jme3.math.Vector3f spawnPosition;
 
-    public WorldAppState(Node rootNode, AssetManager assetManager, PhysicsSpace physicsSpace, Camera cam, InputAppState input) {
+    public WorldAppState(Node rootNode, AssetManager assetManager, PhysicsSpace physicsSpace, Camera cam, InputAppState input, GameRegistry registry) {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.physicsSpace = physicsSpace;

@@ -4,7 +4,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.texture.Texture2D;
-import jogo.util.ProcTextures;
+import com.jme3.texture.Texture;
 import jogo.voxel.VoxelBlockType;
 
 public class SandBlockType extends VoxelBlockType {
@@ -19,9 +19,11 @@ public class SandBlockType extends VoxelBlockType {
 
     @Override
     public Material getMaterial(AssetManager assetManager) {
-        Texture2D tex = ProcTextures.checker(128, 6,
-                new ColorRGBA(0.92f, 0.86f, 0.66f, 1f),
-                new ColorRGBA(0.85f, 0.78f, 0.58f, 1f));
+        Texture2D tex = (Texture2D) assetManager.loadTexture("textures/blocks/sand.png");
+        tex.setMagFilter(Texture.MagFilter.Nearest);
+        tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+        tex.setAnisotropicFilter(1);
+        tex.setWrap(Texture.WrapMode.Repeat);
         Material m = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
         m.setTexture("DiffuseMap", tex);
         m.setBoolean("UseMaterialColors", true);

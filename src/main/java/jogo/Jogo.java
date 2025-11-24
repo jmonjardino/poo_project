@@ -45,6 +45,8 @@ public class Jogo extends SimpleApplication {
         inputManager.setCursorVisible(false);
         viewPort.setBackgroundColor(new ColorRGBA(0.6f, 0.75f, 1f, 1f)); // sky-like
 
+        assetManager.registerLocator("src/main/java/assets", com.jme3.asset.plugins.FileLocator.class);
+
         // Physics
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
@@ -58,11 +60,13 @@ public class Jogo extends SimpleApplication {
         InputAppState input = new InputAppState();
         stateManager.attach(input);
 
-        WorldAppState world = new WorldAppState(rootNode, assetManager, physicsSpace, cam, input);
+        // Engine registry must exist before world
+        GameRegistry registry = new GameRegistry();
+
+        WorldAppState world = new WorldAppState(rootNode, assetManager, physicsSpace, cam, input, registry);
         stateManager.attach(world);
 
-        // Engine registry and render layers
-        GameRegistry registry = new GameRegistry();
+        // Engine render layers
         RenderIndex renderIndex = new RenderIndex();
         stateManager.attach(new RenderAppState(rootNode, assetManager, registry, renderIndex));
         stateManager.attach(new InteractionAppState(rootNode, cam, input, renderIndex, world));

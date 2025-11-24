@@ -124,17 +124,12 @@ public class VoxelWorld {
     }
 
     public void generateLayers() {
-        int cx = sizeX / 2;
-        int cz = sizeZ / 2;
-        int y = groundHeight;
-        for (int dz = -8; dz <= 8; dz++) {
-            setBlock(cx, y, cz + dz, VoxelPalette.WOOD_ID);
-        }
-        for (int dx = -8; dx <= 8; dx++) {
-            setBlock(cx + dx, y, cz - 10, VoxelPalette.DIRT_ID);
-        }
-        for (int dx = -8; dx <= 8; dx++) {
-            setBlock(cx + dx, y, cz + 10, VoxelPalette.SAND_ID);
+        for (int x = 0; x < sizeX; x++) {
+            for (int y = 0; y < sizeY; y++) {
+                for (int z = 0; z < sizeZ; z++) {
+                    setBlock(x, y, z, VoxelPalette.DIRT_ID);
+                }
+            }
         }
     }
 
