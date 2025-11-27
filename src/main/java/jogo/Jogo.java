@@ -12,6 +12,7 @@ import jogo.appstate.WorldAppState;
 import jogo.appstate.HudAppState;
 import jogo.appstate.RenderAppState;
 import jogo.appstate.InteractionAppState;
+import jogo.appstate.CraftingAppState;
 import jogo.engine.GameRegistry;
 import jogo.gameobject.Wood;
 import jogo.gameobject.item.BreakableItem;
@@ -69,31 +70,47 @@ public class Jogo extends SimpleApplication {
         // Engine render layers
         RenderIndex renderIndex = new RenderIndex();
         stateManager.attach(new RenderAppState(rootNode, assetManager, registry, renderIndex));
-        stateManager.attach(new InteractionAppState(rootNode, cam, input, renderIndex, world));
 
         // Demo objects moved below after player attached
 
         PlayerAppState player = new PlayerAppState(rootNode, assetManager, cam, input, physicsSpace, world);
         stateManager.attach(player);
+        InteractionAppState interaction = new InteractionAppState(rootNode, cam, input, renderIndex, world, registry,
+                player);
+        stateManager.attach(interaction);
 
         // Place demo items AFTER player attach using a single spawn reference.
         // This avoids using a fallback spawn before the world is fully initialized
         // and keeps items close to the player's starting area.
 
+        var spawn = world.getRecommendedSpawnPosition();
+        var vw = world.getVoxelWorld();
+        int sx = (int) Math.floor(spawn.x);
+        int sz = (int) Math.floor(spawn.z);
+        int ty = vw != null ? vw.getTopSolidY(sx, sz) : (int) Math.floor(spawn.y);
+
         BreakableItem axe = new BreakableItem("Axe", 100, 100, "Axe", "Basic", 1.0);
-        axe.setPosition(163, 10, 161);
+        axe.setPosition(sx + 2, ty + 1, sz);
         registry.add(axe);
 
-        Wood woodTeste = new Wood("Test Wood", 100, "Oak");
-        woodTeste.setPosition(158, 10, 161);
-        registry.add(woodTeste);
+        Wood wood1 = new Wood("Test Wood", 100, "Oak");
+        wood1.setPosition(sx - 2, ty + 1, sz);
+        registry.add(wood1);
+
+        Wood wood2 = new Wood("Test Wood", 100, "Oak");
+        wood2.setPosition(sx + 1, ty + 1, sz + 1);
+        registry.add(wood2);
+
+        Wood wood3 = new Wood("Test Wood", 100, "Oak");
+        wood3.setPosition(sx - 1, ty + 1, sz - 1);
+        registry.add(wood3);
 
         Enemy enemy = new Enemy("Enemy");
-        enemy.setPosition(163, 13, 163);
+        enemy.setPosition(sx, ty + 1, sz + 2);
         registry.add(enemy);
 
         Ally ally = new Ally("Ally", "Guard", 10);
-        ally.setPosition(163, 13, 165);
+        ally.setPosition(sx, ty + 1, sz - 2);
         registry.add(ally);
 
         // Post-processing: SSAO for subtle contact shadows
@@ -111,7 +128,9 @@ public class Jogo extends SimpleApplication {
             System.out.println("SSAO not available (effects module missing?): " + e.getMessage());
         }
 
-        // HUD (just a crosshair for now)
-        stateManager.attach(new HudAppState(guiNode, assetManager));
+        // HUD
+        HudAppState hud = new HudAppState(guiNode, assetManager, player);
+        stateManager.attach(hud);
+        stateManager.attach(new CraftingAppState(input, player, hud));
     }
 }

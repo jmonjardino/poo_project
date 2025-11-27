@@ -192,4 +192,6 @@ public class PlayerAppState extends BaseAppState {
             physicsSpace.add(characterControl);
         }
     }
+
+    public Player getPlayer() { return player; }
 }

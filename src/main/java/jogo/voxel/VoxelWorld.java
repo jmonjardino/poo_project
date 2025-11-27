@@ -125,9 +125,10 @@ public class VoxelWorld {
 
     public void generateLayers() {
         for (int x = 0; x < sizeX; x++) {
-            for (int y = 0; y < sizeY; y++) {
-                for (int z = 0; z < sizeZ; z++) {
-                    setBlock(x, y, z, VoxelPalette.DIRT_ID);
+            for (int z = 0; z < sizeZ; z++) {
+                for (int y = 0; y < sizeY; y++) {
+                    byte id = (y < groundHeight) ? VoxelPalette.DIRT_ID : VoxelPalette.AIR_ID;
+                    setBlock(x, y, z, id);
                 }
             }
         }

@@ -11,6 +11,8 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
+import com.jme3.texture.Texture2D;
+import com.jme3.texture.Texture;
 import jogo.engine.GameRegistry;
 import jogo.engine.RenderIndex;
 import jogo.framework.math.Vec3;
@@ -101,7 +103,18 @@ public class RenderAppState extends BaseAppState {
             return g;
         } else if (obj instanceof Wood) {
             Geometry g = new Geometry(obj.getName(), new Box(0.3f, 0.3f, 0.3f));
-            g.setMaterial(colored(ColorRGBA.Yellow));
+            Texture2D tex = (Texture2D) assetManager.loadTexture("textures/blocks/oak_planks.png");
+            tex.setMagFilter(Texture.MagFilter.Nearest);
+            tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+            tex.setAnisotropicFilter(1);
+            tex.setWrap(Texture.WrapMode.Repeat);
+            Material m = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+            m.setTexture("DiffuseMap", tex);
+            m.setBoolean("UseMaterialColors", true);
+            m.setColor("Diffuse", ColorRGBA.White);
+            m.setColor("Specular", ColorRGBA.White.mult(0.01f));
+            m.setFloat("Shininess", 8f);
+            g.setMaterial(m);
             return g;
         } else if (obj instanceof Item) {
             Geometry g = new Geometry(obj.getName(), new Box(0.3f, 0.3f, 0.3f));

@@ -6,17 +6,26 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
 import com.jme3.scene.Node;
+import jogo.gameobject.character.Player;
 
 public class HudAppState extends BaseAppState {
 
     private final Node guiNode;
     private final AssetManager assetManager;
     private BitmapText crosshair;
+    private BitmapText inventoryText;
+    private BitmapText statusText;
+    private final PlayerAppState playerAppState;
+    private int lastCapacity = -1;
+    private float statusTTL = 0f;
 
-    public HudAppState(Node guiNode, AssetManager assetManager) {
+    public HudAppState(Node guiNode, AssetManager assetManager, PlayerAppState playerAppState) {
         this.guiNode = guiNode;
         this.assetManager = assetManager;
+        this.playerAppState = playerAppState;
     }
 
     @Override
@@ -28,6 +37,17 @@ public class HudAppState extends BaseAppState {
         guiNode.attachChild(crosshair);
         centerCrosshair();
         System.out.println("HudAppState initialized: crosshair attached");
+
+        inventoryText = new BitmapText(font, false);
+        inventoryText.setSize(font.getCharSet().getRenderedSize());
+        guiNode.attachChild(inventoryText);
+        updateInventoryText();
+        positionInventoryText();
+
+        statusText = new BitmapText(font, false);
+        statusText.setSize(font.getCharSet().getRenderedSize());
+        guiNode.attachChild(statusText);
+        positionStatusText();
     }
 
     private void centerCrosshair() {
@@ -39,21 +59,97 @@ public class HudAppState extends BaseAppState {
         crosshair.setLocalTranslation(x, y, 0);
     }
 
+    private void positionInventoryText() {
+        SimpleApplication sapp = (SimpleApplication) getApplication();
+        int h = sapp.getCamera().getHeight();
+        float x = 10f;
+        float y = h - 10f;
+        inventoryText.setLocalTranslation(x, y, 0);
+    }
+
+    private void positionStatusText() {
+        SimpleApplication sapp = (SimpleApplication) getApplication();
+        int h = sapp.getCamera().getHeight();
+        float x = 10f;
+        float y = h - 30f;
+        statusText.setLocalTranslation(x, y, 0);
+    }
+
+    private void updateInventoryText() {
+        inventoryText.setText(inventorySummary());
+    }
+
+    private String inventorySummary() {
+        Player p = playerAppState != null ? playerAppState.getPlayer() : null;
+        if (p == null)
+            return "Inv (n/a)";
+        var inv = p.getInventory();
+        int cap = inv.capacity();
+        java.util.LinkedHashMap<Integer, Integer> totals = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < cap; i++) {
+            int type = inv.getItemTypeAt(i);
+            int count = inv.getCountAt(i);
+            if (type > 0 && count > 0)
+                totals.merge(type, count, Integer::sum);
+        }
+        if (totals.isEmpty())
+            return "Inv (vazio)";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Inv ");
+        boolean first = true;
+        for (var e : totals.entrySet()) {
+            if (!first)
+                sb.append(", ");
+            first = false;
+            sb.append(nameForType(e.getKey())).append(": ").append(e.getValue());
+        }
+        return sb.toString();
+    }
+
+    private String nameForType(int type) {
+        if (type == 100)
+            return "Axe";
+        if (type == 200)
+            return "Wood";
+        if (type == 210)
+            return "Planks";
+        if (type == 300)
+            return "Workbench";
+        return "Item";
+    }
+
+    public void showStatus(String msg, float ttl) {
+        statusText.setText(msg != null ? msg : "");
+        statusTTL = Math.max(0f, ttl);
+        positionStatusText();
+    }
+
     @Override
     public void update(float tpf) {
-        // keep centered (cheap)
         centerCrosshair();
+        updateInventoryText();
+        positionInventoryText();
+        if (statusTTL > 0f) {
+            statusTTL -= tpf;
+            if (statusTTL <= 0f) statusText.setText("");
+        }
     }
 
     @Override
     protected void cleanup(Application app) {
-        if (crosshair != null) crosshair.removeFromParent();
+        if (crosshair != null)
+            crosshair.removeFromParent();
+        if (inventoryText != null)
+            inventoryText.removeFromParent();
+        if (statusText != null)
+            statusText.removeFromParent();
     }
 
     @Override
-    protected void onEnable() { }
+    protected void onEnable() {
+    }
 
     @Override
-    protected void onDisable() { }
+    protected void onDisable() {
+    }
 }
-

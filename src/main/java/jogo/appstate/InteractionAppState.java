@@ -9,6 +9,11 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.collision.CollisionResults;
 import jogo.engine.RenderIndex;
+import jogo.engine.GameRegistry;
+import jogo.gameobject.character.Player;
+import jogo.gameobject.item.BreakableItem;
+import jogo.gameobject.item.Item;
+import jogo.gameobject.Wood;
 import jogo.gameobject.GameObject;
 import jogo.gameobject.item.Item;
 import jogo.voxel.VoxelWorld;
@@ -19,15 +24,19 @@ public class InteractionAppState extends BaseAppState {
     private final Camera cam;
     private final InputAppState input;
     private final RenderIndex renderIndex;
+    private final GameRegistry registry;
+    private final PlayerAppState playerAppState;
     private final WorldAppState world;
     private float reach = 5.5f;
 
-    public InteractionAppState(Node rootNode, Camera cam, InputAppState input, RenderIndex renderIndex, WorldAppState world) {
+    public InteractionAppState(Node rootNode, Camera cam, InputAppState input, RenderIndex renderIndex, WorldAppState world, GameRegistry registry, PlayerAppState playerAppState) {
         this.rootNode = rootNode;
         this.cam = cam;
         this.input = input;
         this.renderIndex = renderIndex;
         this.world = world;
+        this.registry = registry;
+        this.playerAppState = playerAppState;
     }
 
     @Override
@@ -50,9 +59,18 @@ public class InteractionAppState extends BaseAppState {
             Spatial hit = results.getClosestCollision().getGeometry();
             GameObject obj = findRegistered(hit);
             if (obj instanceof Item item) {
-                item.onInteract();
-                System.out.println("Interacted with item: " + obj.getName());
-                return; // prefer item interaction if both are hit
+                Player player = playerAppState != null ? playerAppState.getPlayer() : null;
+                if (player != null) {
+                    try {
+                        int type = itemTypeFor(item);
+                        player.getInventory().add(type, 1);
+                        if (registry != null) registry.remove(item);
+                        System.out.println("Picked item: " + obj.getName());
+                    } catch (RuntimeException e) {
+                        System.out.println("Could not pick item: " + e.getMessage());
+                    }
+                }
+                return;
             }
         }
 
@@ -74,6 +92,12 @@ public class InteractionAppState extends BaseAppState {
             cur = cur.getParent();
         }
         return null;
+    }
+
+    private int itemTypeFor(Item item) {
+        if (item instanceof BreakableItem) return 100;
+        if (item instanceof Wood) return 200;
+        return 900;
     }
 
     @Override

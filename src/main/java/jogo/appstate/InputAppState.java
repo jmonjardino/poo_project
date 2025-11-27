@@ -22,6 +22,9 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     private volatile boolean respawnRequested;
     private volatile boolean interactRequested;
     private volatile boolean printCoordsRequested;
+    private volatile boolean craftRequested;
+    private volatile boolean craftRecipe1Requested;
+    private volatile boolean craftRecipe2Requested;
     private float mouseDX, mouseDY;
     private boolean mouseCaptured = true;
 
@@ -52,8 +55,13 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.addMapping("Interact", new KeyTrigger(KeyInput.KEY_E));
         // Print coordinates (O)
         im.addMapping("PrintCoords", new KeyTrigger(KeyInput.KEY_O));
+        im.addMapping("Craft", new KeyTrigger(KeyInput.KEY_C));
+        im.addMapping("CraftRecipe1", new KeyTrigger(KeyInput.KEY_1));
+        im.addMapping("CraftRecipe2", new KeyTrigger(KeyInput.KEY_2));
 
-        im.addListener(this, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight", "Jump", "Sprint", "ToggleMouse", "Break", "ToggleShading", "Respawn", "Interact", "PrintCoords");
+        im.addListener(this, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight", "Jump", "Sprint", "ToggleMouse",
+                "Break", "ToggleShading", "Respawn", "Interact", "PrintCoords", "Craft", "CraftRecipe1",
+                "CraftRecipe2");
         im.addListener(this, "MouseX+", "MouseX-", "MouseY+", "MouseY-");
     }
 
@@ -75,6 +83,9 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.deleteMapping("ToggleShading");
         im.deleteMapping("Respawn");
         im.deleteMapping("Interact");
+        im.deleteMapping("Craft");
+        im.deleteMapping("CraftRecipe1");
+        im.deleteMapping("CraftRecipe2");
         im.removeListener(this);
     }
 
@@ -84,7 +95,8 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     }
 
     @Override
-    protected void onDisable() { }
+    protected void onDisable() {
+    }
 
     @Override
     public void onAction(String name, boolean isPressed, float tpf) {
@@ -95,32 +107,52 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
             case "MoveRight" -> right = isPressed;
             case "Sprint" -> sprint = isPressed;
             case "Jump" -> {
-                if (isPressed) jumpRequested = true;
+                if (isPressed)
+                    jumpRequested = true;
             }
             case "ToggleMouse" -> {
-                if (isPressed) setMouseCaptured(!mouseCaptured);
+                if (isPressed)
+                    setMouseCaptured(!mouseCaptured);
             }
             case "Break" -> {
-                if (isPressed && mouseCaptured) breakRequested = true;
+                if (isPressed && mouseCaptured)
+                    breakRequested = true;
             }
             case "ToggleShading" -> {
-                if (isPressed) toggleShadingRequested = true;
+                if (isPressed)
+                    toggleShadingRequested = true;
             }
             case "Respawn" -> {
-                if (isPressed) respawnRequested = true;
+                if (isPressed)
+                    respawnRequested = true;
             }
             case "Interact" -> {
-                if (isPressed && mouseCaptured) interactRequested = true;
+                if (isPressed && mouseCaptured)
+                    interactRequested = true;
             }
             case "PrintCoords" -> {
-                if (isPressed) printCoordsRequested = true;
+                if (isPressed)
+                    printCoordsRequested = true;
+            }
+            case "Craft" -> {
+                if (isPressed)
+                    craftRequested = true;
+            }
+            case "CraftRecipe1" -> {
+                if (isPressed)
+                    craftRecipe1Requested = true;
+            }
+            case "CraftRecipe2" -> {
+                if (isPressed)
+                    craftRecipe2Requested = true;
             }
         }
     }
 
     @Override
     public void onAnalog(String name, float value, float tpf) {
-        if (!mouseCaptured) return;
+        if (!mouseCaptured)
+            return;
         switch (name) {
             case "MouseX+" -> mouseDX += value;
             case "MouseX-" -> mouseDX -= value;
@@ -192,6 +224,24 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     public boolean consumePrintCoordsRequested() {
         boolean r = printCoordsRequested;
         printCoordsRequested = false;
+        return r;
+    }
+
+    public boolean consumeCraftRequested() {
+        boolean r = craftRequested;
+        craftRequested = false;
+        return r;
+    }
+
+    public boolean consumeCraftRecipe1Requested() {
+        boolean r = craftRecipe1Requested;
+        craftRecipe1Requested = false;
+        return r;
+    }
+
+    public boolean consumeCraftRecipe2Requested() {
+        boolean r = craftRecipe2Requested;
+        craftRecipe2Requested = false;
         return r;
     }
 }
