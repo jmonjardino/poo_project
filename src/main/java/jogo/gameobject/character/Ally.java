@@ -1,10 +1,15 @@
 package jogo.gameobject.character;
 
+import jogo.gameobject.capability.HasAI;
+import jogo.framework.math.Vec3;
+
 /**
  * Entidade aliada neutra em relação ao motor.
  * Suporta funções de assistência com atributos simples e validação.
  */
-public class Ally extends Character {
+public class Ally extends Character implements HasAI {
+
+    
     /** Papel/funcão do aliado (ex.: Guard, Medic, Scout). */
     private String role;
     /** Poder de proteção aplicado em contexto defensivo (não negativo). */
@@ -13,6 +18,18 @@ public class Ally extends Character {
     private int assistPower;
     /** Potência de cura por ação de suporte (não negativa). */
     private int healPower;
+
+    /** Estados possiveis do aliado */
+    public enum AllyState {IDLE, FOLLOW};
+    /** Estado atual do aliado. */
+    private AllyState state = AllyState.IDLE;
+
+    /** Distância máxima para seguir o jogador. */
+    private double followRange = 10.0;
+    /** Distância mínima para parar de seguir o jogador. */
+    private double stopRange = 5.0;
+
+
 
     /**
      * Constrói um aliado com papel e proteção.
@@ -74,6 +91,23 @@ public class Ally extends Character {
      * @param target personagem alvo da cura
      */
     public void supportHeal(Character target) { if (target != null && healPower > 0) target.heal(healPower); }
+
+    /**
+     * Atualiza a IA do aliado com base no contexto do jogador.
+     * @param context contexto de IA contendo posição do jogador
+     */
+    @Override
+    public void updateAI(jogo.gameobject.capability.AIContext context) {
+        // Simple AI behavior: if there is a target in context, apply support damage
+        if (context.shouldFollow(getPosition(), followRange)) {
+            state = AllyState.FOLLOW;
+            Vec3 step = context.computeStepTowardsPlayerXZ(getPosition(), 0.5, stopRange);
+            setPosition(getPosition().x + step.x, getPosition().y + step.y, getPosition().z + step.z);
+        } else if (context.shouldStop(getPosition(), stopRange)) {
+            state = AllyState.IDLE;
+        }
+    }
+
 
     @Override
     public String toString() {
