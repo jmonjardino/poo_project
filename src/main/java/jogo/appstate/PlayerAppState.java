@@ -194,4 +194,6 @@ public class PlayerAppState extends BaseAppState {
     }
 
     public Player getPlayer() { return player; }
+    /** Velocidade base de caminhada (sem sprint), usada pela IA do Ally. */
+    public float getMoveSpeed() { return moveSpeed; }
 }

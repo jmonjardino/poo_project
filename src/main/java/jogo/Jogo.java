@@ -12,6 +12,7 @@ import jogo.appstate.WorldAppState;
 import jogo.appstate.HudAppState;
 import jogo.appstate.RenderAppState;
 import jogo.appstate.InteractionAppState;
+import jogo.appstate.AIAppState;
 import jogo.appstate.CraftingAppState;
 import jogo.engine.GameRegistry;
 import jogo.gameobject.Wood;
@@ -69,7 +70,7 @@ public class Jogo extends SimpleApplication {
 
         // Engine render layers
         RenderIndex renderIndex = new RenderIndex();
-        stateManager.attach(new RenderAppState(rootNode, assetManager, registry, renderIndex));
+        stateManager.attach(new RenderAppState(rootNode, assetManager, registry, renderIndex, world));
 
         // Demo objects moved below after player attached
 
@@ -78,6 +79,9 @@ public class Jogo extends SimpleApplication {
         InteractionAppState interaction = new InteractionAppState(rootNode, cam, input, renderIndex, world, registry,
                 player);
         stateManager.attach(interaction);
+
+        AIAppState ai = new AIAppState(player, world, registry);
+        stateManager.attach(ai);
 
         // Place demo items AFTER player attach using a single spawn reference.
         // This avoids using a fallback spawn before the world is fully initialized

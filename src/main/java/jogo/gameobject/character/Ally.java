@@ -98,10 +98,11 @@ public class Ally extends Character implements HasAI {
      */
     @Override
     public void updateAI(jogo.gameobject.capability.AIContext context) {
-        // Simple AI behavior: if there is a target in context, apply support damage
+        // Decisão de estado e movimento neutros (sem tipos do motor)
         if (context.shouldFollow(getPosition(), followRange)) {
             state = AllyState.FOLLOW;
-            Vec3 step = context.computeStepTowardsPlayerXZ(getPosition(), 0.5, stopRange);
+            // Passo limitado pela velocidade base do jogador e tpf
+            Vec3 step = context.computeStepTowardsPlayerXZ(getPosition(), stopRange);
             setPosition(getPosition().x + step.x, getPosition().y + step.y, getPosition().z + step.z);
         } else if (context.shouldStop(getPosition(), stopRange)) {
             state = AllyState.IDLE;

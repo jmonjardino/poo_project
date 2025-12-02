@@ -14,6 +14,7 @@ java {
 }
 
 tasks.withType(JavaCompile) {
+    // Garantir codificação consistente para comentários/strings (evita erros em Windows)
     options.encoding = 'UTF-8'
 }
 
@@ -84,8 +85,7 @@ task downloadAndUnzipWindowsJre(dependsOn: downloadWindowsJre, type: Copy) {
     }
 }
 
-task buildWindowsDistribution(dependsOn: [distZip, downloadAndUnzipWindowsJre], type: Copy)
-{
+task buildWindowsDistribution(dependsOn: [distZip, downloadAndUnzipWindowsJre], type: Copy) {
     group 'distribution'
     from files("${projectDir}/scripts/desktopDeployment/Test.bat"), zipTree(distZip.archiveFile), "${buildDir}/jres/windowsJre"
     into new File(buildDir, 'distributions/Test-windows')
@@ -116,8 +116,7 @@ task downloadAndUnzipLinuxJre(dependsOn: downloadLinuxJre, type: Copy) {
     }
 }
 
-task buildLinuxDistribution(dependsOn: [distZip, downloadAndUnzipLinuxJre], type: Copy)
-{
+task buildLinuxDistribution(dependsOn: [distZip, downloadAndUnzipLinuxJre], type: Copy) {
     group 'distribution'
     from files("${projectDir}/scripts/desktopDeployment/Test.sh"){
         fileMode 0755
@@ -160,8 +159,7 @@ task downloadAndUnzipMacJre(dependsOn: downloadMacJre, type: Copy) {
     }
 }
 
-task buildMacDistribution(dependsOn: [distZip, downloadAndUnzipMacJre], type: Copy)
-{
+task buildMacDistribution(dependsOn: [distZip, downloadAndUnzipMacJre], type: Copy) {
     group 'distribution'
     from files("${projectDir}/scripts/desktopDeployment/Test.command"){
         fileMode 0755
@@ -220,6 +218,4 @@ task fund(){
     }
 }
 
-application {
-    applicationDefaultJvmArgs = ["-XstartOnFirstThread"]
-}
+// macOS-only JVM arg is configured earlier; avoid setting it on Windows/Linux

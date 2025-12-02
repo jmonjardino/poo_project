@@ -15,6 +15,7 @@ import com.jme3.texture.Texture2D;
 import com.jme3.texture.Texture;
 import jogo.engine.GameRegistry;
 import jogo.engine.RenderIndex;
+import jogo.voxel.VoxelWorld;
 import jogo.framework.math.Vec3;
 import jogo.gameobject.GameObject;
 import jogo.gameobject.Wood;
@@ -35,15 +36,17 @@ public class RenderAppState extends BaseAppState {
     private final AssetManager assetManager;
     private final GameRegistry registry;
     private final RenderIndex renderIndex;
+    private final WorldAppState worldAppState;
 
     private Node gameNode;
     private final Map<GameObject, Spatial> instances = new HashMap<>();
 
-    public RenderAppState(Node rootNode, AssetManager assetManager, GameRegistry registry, RenderIndex renderIndex) {
+    public RenderAppState(Node rootNode, AssetManager assetManager, GameRegistry registry, RenderIndex renderIndex, WorldAppState worldAppState) {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.registry = registry;
         this.renderIndex = renderIndex;
+        this.worldAppState = worldAppState;
     }
 
     @Override
@@ -68,8 +71,22 @@ public class RenderAppState extends BaseAppState {
                     renderIndex.register(s, obj);
                 }
             }
+            //Adicionar fisica as instancias de Ally e Enemy
             if (s != null) {
                 Vec3 p = obj.getPosition();
+                if (obj instanceof Ally || obj instanceof Enemy) {
+                    VoxelWorld vw = worldAppState != null ? worldAppState.getVoxelWorld() : null;
+                    if (vw != null) {
+                        int topY = vw.getTopSolidY((int) p.x, (int) p.z);
+                        if (topY >= 0) {
+                            float ny = topY + 1f;
+                            if (p.y != ny) {
+                                obj.setPosition(p.x, ny + 0.5f, p.z);
+                                p = obj.getPosition();
+                            }
+                        }
+                    }
+                }
                 s.setLocalTranslation(new Vector3f(p.x, p.y, p.z));
             }
         }
