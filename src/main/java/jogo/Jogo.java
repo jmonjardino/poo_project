@@ -87,11 +87,11 @@ public class Jogo extends SimpleApplication {
         // This avoids using a fallback spawn before the world is fully initialized
         // and keeps items close to the player's starting area.
 
-        var spawn = world.getRecommendedSpawnPosition();
-        var vw = world.getVoxelWorld();
-        int sx = (int) Math.floor(spawn.x);
-        int sz = (int) Math.floor(spawn.z);
-        int ty = vw != null ? vw.getTopSolidY(sx, sz) : (int) Math.floor(spawn.y);
+        // Manual spawn near center of world (320x320)
+        // Height (ty) set to 35 to fall safely onto terrain (max height ~24)
+        int sx = 160;
+        int sz = 160;
+        int ty = 35;
 
         BreakableItem axe = new BreakableItem("Axe", 100, 100, "Axe", "Basic", 1.0);
         axe.setPosition(sx + 2, ty + 1, sz);
@@ -109,9 +109,9 @@ public class Jogo extends SimpleApplication {
         wood3.setPosition(sx - 1, ty + 1, sz - 1);
         registry.add(wood3);
 
-        Enemy enemy = new Enemy("Enemy");
-        enemy.setPosition(sx, ty + 1, sz + 2);
-        registry.add(enemy);
+        Enemy zombie = new Enemy("Zombie", 10, 0);
+        zombie.setPosition(sx, ty + 1, sz + 2);
+        registry.add(zombie);
 
         Ally ally = new Ally("Ally", "Guard", 10);
         ally.setPosition(sx, ty + 1, sz - 2);

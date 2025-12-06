@@ -112,6 +112,7 @@ public class RenderAppState extends BaseAppState {
             return g;
         } else if (obj instanceof Enemy) {
             Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
+            
             g.setMaterial(colored(ColorRGBA.Red));
             return g;
         } else if (obj instanceof Ally) {

@@ -12,6 +12,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture2D;
 import jogo.util.ProcTextures;
+import jogo.util.FastNoiseLite;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class VoxelWorld {
     private boolean wireframe = false; // Wireframe: Off by default
     private boolean culling = true; // Culling: On by default
     private int groundHeight = 8; // baseline Y level
+    private int seed = 123456; // Default seed
 
     private final int chunkSize = Chunk.SIZE;
     private final int chunkCountX, chunkCountY, chunkCountZ;
@@ -124,10 +126,27 @@ public class VoxelWorld {
     }
 
     public void generateLayers() {
+        FastNoiseLite noise = new FastNoiseLite(seed);
+        noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+        noise.SetFrequency(0.01f); // Adjust for terrain scale
+
         for (int x = 0; x < sizeX; x++) {
             for (int z = 0; z < sizeZ; z++) {
+                // Determine height: base 16 + variation +/- 8
+                float noiseVal = noise.GetNoise(x, z);
+                int height = (int) (16 + noiseVal * 8);
+
                 for (int y = 0; y < sizeY; y++) {
-                    byte id = (y < groundHeight) ? VoxelPalette.DIRT_ID : VoxelPalette.AIR_ID;
+                    byte id = VoxelPalette.AIR_ID;
+                    if (y <= height) {
+                        if (y == height) {
+                            id = VoxelPalette.DIRT_ID; // Top: Dirt
+                        } else if (y > height - 3) {
+                            id = VoxelPalette.DIRT_ID; // 3 layers of dirt
+                        } else {
+                            id = VoxelPalette.STONE_ID; // Stone below
+                        }
+                    }
                     setBlock(x, y, z, id);
                 }
             }
