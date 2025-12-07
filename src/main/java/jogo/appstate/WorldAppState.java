@@ -28,7 +28,8 @@ public class WorldAppState extends BaseAppState {
     private VoxelWorld voxelWorld;
     private com.jme3.math.Vector3f spawnPosition;
 
-    public WorldAppState(Node rootNode, AssetManager assetManager, PhysicsSpace physicsSpace, Camera cam, InputAppState input, GameRegistry registry) {
+    public WorldAppState(Node rootNode, AssetManager assetManager, PhysicsSpace physicsSpace, Camera cam,
+            InputAppState input, GameRegistry registry) {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.physicsSpace = physicsSpace;
@@ -51,7 +52,8 @@ public class WorldAppState extends BaseAppState {
         worldNode.addLight(ambient);
 
         DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-0.35f, -1.3f, -0.25f).normalizeLocal()); // more top-down to reduce harsh contrast
+        sun.setDirection(new Vector3f(-0.35f, -1.3f, -0.25f).normalizeLocal()); // more top-down to reduce harsh
+                                                                                // contrast
         sun.setColor(ColorRGBA.White.mult(0.85f)); // slightly dimmer sun
         worldNode.addLight(sun);
 
@@ -75,18 +77,13 @@ public class WorldAppState extends BaseAppState {
         return voxelWorld;
     }
 
+    public PhysicsSpace getPhysicsSpace() {
+        return physicsSpace;
+    }
+
     @Override
     public void update(float tpf) {
-        if (input != null && input.isMouseCaptured() && input.consumeBreakRequested()) {
-            var pick = voxelWorld.pickFirstSolid(cam, 6f);
-            pick.ifPresent(hit -> {
-                VoxelWorld.Vector3i cell = hit.cell;
-                if (voxelWorld.breakAt(cell.x, cell.y, cell.z)) {
-                    voxelWorld.rebuildDirtyChunks(physicsSpace);
-                    playerAppState.refreshPhysics();
-                }
-            });
-        }
+        // Mining logic moved to InteractionAppState for progressive breaking
         if (input != null && input.consumeToggleShadingRequested()) {
             voxelWorld.toggleRenderDebug();
         }
@@ -109,8 +106,10 @@ public class WorldAppState extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() { }
+    protected void onEnable() {
+    }
 
     @Override
-    protected void onDisable() { }
+    protected void onDisable() {
+    }
 }

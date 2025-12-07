@@ -110,11 +110,11 @@ public class Jogo extends SimpleApplication {
         registry.add(wood3);
 
         Enemy zombie = new Enemy("Zombie", 10, 0);
-        zombie.setPosition(sx, ty + 1, sz + 2);
+        zombie.setPosition(sx + 40, ty + 1, sz + 40);
         registry.add(zombie);
 
         Ally ally = new Ally("Ally", "Guard", 10);
-        ally.setPosition(sx, ty + 1, sz - 2);
+        ally.setPosition(sx - 40, ty + 1, sz - 40);
         registry.add(ally);
 
         // Post-processing: SSAO for subtle contact shadows

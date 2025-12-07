@@ -149,8 +149,49 @@ public class VoxelWorld {
                     }
                     setBlock(x, y, z, id);
                 }
+                // Tree generation
+                if (height < sizeY - 6 && x > 2 && x < sizeX - 2 && z > 2 && z < sizeZ - 2) {
+                    // 1% chance for a tree
+                    if (Math.random() < 0.01) {
+                        generateTree(x, height + 1, z);
+                    }
+                }
             }
         }
+    }
+
+    private void generateTree(int x, int y, int z) {
+        // Trunk: 4 blocks up
+        int trunkHeight = 4;
+        for (int i = 0; i < trunkHeight; i++) {
+            setBlock(x, y + i, z, VoxelPalette.LOG_ID);
+        }
+
+        // Leaves: 3x3 at top 2 layers of trunk, plus 1 on top
+        int leavesStart = y + 2;
+        int leavesEnd = y + trunkHeight; // inclusive of top layer logic
+
+        // Layer 1 (Wide): y + 2
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                // Determine shape (circle-ish or square)
+                if (Math.abs(dx) == 2 && Math.abs(dz) == 2)
+                    continue; // Skip corners for rounded look
+                if (dx == 0 && dz == 0)
+                    continue; // Trunk is here
+                setBlock(x + dx, leavesStart, z + dz, VoxelPalette.LEAVES_ID);
+                setBlock(x + dx, leavesStart + 1, z + dz, VoxelPalette.LEAVES_ID);
+            }
+        }
+
+        // Top Layer: y + 4 (above trunk)
+        setBlock(x, y + trunkHeight, z, VoxelPalette.LEAVES_ID);
+        setBlock(x + 1, y + trunkHeight, z, VoxelPalette.LEAVES_ID);
+        setBlock(x - 1, y + trunkHeight, z, VoxelPalette.LEAVES_ID);
+        setBlock(x, y + trunkHeight, z + 1, VoxelPalette.LEAVES_ID);
+        setBlock(x, y + trunkHeight, z - 1, VoxelPalette.LEAVES_ID);
+        // Add a bit more height?
+        setBlock(x, y + trunkHeight + 1, z, VoxelPalette.LEAVES_ID);
     }
 
     public int getTopSolidY(int x, int z) {
@@ -297,7 +338,7 @@ public class VoxelWorld {
     private boolean isSolid(int x, int y, int z) {
         if (!inBounds(x, y, z))
             return false;
-        return palette.get(getBlock(x, y, z)).isSolid();
+        return palette.get(getBlock(x, y, z)) instanceof jogo.voxel.blocks.AirBlockType == false;
     }
 
     private boolean inBounds(int x, int y, int z) {

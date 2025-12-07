@@ -20,6 +20,8 @@ public abstract class Character extends GameObject {
     /** Valor máximo de saúde. */
     private final int maxHealth = 100;
 
+    private boolean isAlive = true;
+
     /** Valor atual de saúde. */
     public int getHealth() { return health; }
     /**
@@ -38,17 +40,23 @@ public abstract class Character extends GameObject {
      * Indica se a personagem está viva.
      * @return {@code true} se a saúde atual for maior que 0; caso contrário {@code false}
      */
-    public boolean isAlive() { return health > 0; }
-    /**
-     * Aplica dano positivo à personagem, reduzindo a saúde atual.
-     * Valores menores ou iguais a zero são ignorados. O corte de limites é garantido por {@link #setHealth(int)}.
-     * @param amount quantidade de dano a aplicar (deve ser positiva)
-     */
-    public void takeDamage(int amount) { if (amount > 0) setHealth(health - amount); }
-    /**
-     * Aplica cura positiva à personagem, aumentando a saúde atual.
-     * Valores menores ou iguais a zero são ignorados. O corte de limites é garantido por {@link #setHealth(int)}.
-     * @param amount quantidade de cura a aplicar (deve ser positiva)
-     */
-    public void heal(int amount) { if (amount > 0) setHealth(health + amount); }
+    public boolean isAlive() { return isAlive; }
+
+    public void takeDamage(int amount) { 
+        if (amount > 0) {
+            setHealth(health - amount); 
+        }
+        if (health <= 0) {
+            isAlive = false;
+        }
+    }
+
+    public void heal(int amount) { 
+        if (amount > 0) {
+            setHealth(health + amount); 
+        } 
+        if (health > 0) {
+            isAlive = true;
+        }
+    }
 }

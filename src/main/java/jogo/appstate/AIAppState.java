@@ -26,7 +26,8 @@ public class AIAppState extends BaseAppState {
     }
 
     @Override
-    protected void initialize(Application app) { }
+    protected void initialize(Application app) {
+    }
 
     @Override
     /** Atualização por frame: cria AIContext e entrega ao HasAI.updateAI. */
@@ -35,7 +36,7 @@ public class AIAppState extends BaseAppState {
         Vector3f camLoc = getApplication().getCamera().getLocation();
         Vec3 playerPos = new Vec3(camLoc.x, camLoc.y, camLoc.z);
         double baseSpeed = playerAppState != null ? playerAppState.getMoveSpeed() : 8.0;
-        AIContext ctx = new AIContext(playerPos, baseSpeed, tpf);
+        AIContext ctx = new AIContext(playerPos, baseSpeed, tpf, playerAppState.getPlayer(), registry.getAll());
 
         for (GameObject obj : registry.getAll()) {
             if (obj instanceof HasAI ai) {
@@ -45,11 +46,14 @@ public class AIAppState extends BaseAppState {
     }
 
     @Override
-    protected void cleanup(Application app) { }
+    protected void cleanup(Application app) {
+    }
 
     @Override
-    protected void onEnable() { }
+    protected void onEnable() {
+    }
 
     @Override
-    protected void onDisable() { }
+    protected void onDisable() {
+    }
 }

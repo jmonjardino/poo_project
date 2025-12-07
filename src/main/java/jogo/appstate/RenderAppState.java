@@ -41,7 +41,8 @@ public class RenderAppState extends BaseAppState {
     private Node gameNode;
     private final Map<GameObject, Spatial> instances = new HashMap<>();
 
-    public RenderAppState(Node rootNode, AssetManager assetManager, GameRegistry registry, RenderIndex renderIndex, WorldAppState worldAppState) {
+    public RenderAppState(Node rootNode, AssetManager assetManager, GameRegistry registry, RenderIndex renderIndex,
+            WorldAppState worldAppState) {
         this.rootNode = rootNode;
         this.assetManager = assetManager;
         this.registry = registry;
@@ -71,7 +72,7 @@ public class RenderAppState extends BaseAppState {
                     renderIndex.register(s, obj);
                 }
             }
-            //Adicionar fisica as instancias de Ally e Enemy
+            // Adicionar fisica as instancias de Ally e Enemy
             if (s != null) {
                 Vec3 p = obj.getPosition();
                 if (obj instanceof Ally || obj instanceof Enemy) {
@@ -79,9 +80,11 @@ public class RenderAppState extends BaseAppState {
                     if (vw != null) {
                         int topY = vw.getTopSolidY((int) p.x, (int) p.z);
                         if (topY >= 0) {
-                            float ny = topY + 1f;
-                            if (p.y != ny) {
-                                obj.setPosition(p.x, ny + 0.5f, p.z);
+                            float targetY = topY + 1f;
+                            // Check difference to avoid float precision jitter, set to targetY (ground
+                            // level)
+                            if (Math.abs(p.y - targetY) > 0.01f) {
+                                obj.setPosition(p.x, targetY, p.z);
                                 p = obj.getPosition();
                             }
                         }
@@ -98,33 +101,32 @@ public class RenderAppState extends BaseAppState {
             if (!alive.contains(e.getKey())) {
                 Spatial s = e.getValue();
                 renderIndex.unregister(s);
-                if (s.getParent() != null) s.removeFromParent();
+                if (s.getParent() != null)
+                    s.removeFromParent();
                 it.remove();
             }
         }
     }
 
     private Spatial createSpatialFor(GameObject obj) {
-        //TODO This could be set inside each GameObject!
+        // TODO This could be set inside each GameObject!
         if (obj instanceof Player) {
             Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
             g.setMaterial(colored(ColorRGBA.Green));
             return g;
         } else if (obj instanceof Enemy) {
-            Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
-            
-            g.setMaterial(colored(ColorRGBA.Red));
-            return g;
+            // Updated to use SkinUtils and correct path (skins/cena_estranha.png)
+            return jogo.util.SkinUtils.createCharacterModel(assetManager, "skins/cena_estranha.png");
         } else if (obj instanceof Ally) {
-            Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
-            g.setMaterial(colored(ColorRGBA.Blue));
-            return g;
+            // Temporarily use same skin or ally.jpg if it exists
+            return jogo.util.SkinUtils.createCharacterModel(assetManager, "skins/ally.png");
         } else if (obj instanceof Wood) {
             Geometry g = new Geometry(obj.getName(), new Box(0.3f, 0.3f, 0.3f));
             Texture2D tex = (Texture2D) assetManager.loadTexture("textures/blocks/oak_planks.png");
             tex.setMagFilter(Texture.MagFilter.Nearest);
             tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
             tex.setAnisotropicFilter(1);
+            tex.setWrap(Texture.WrapMode.Repeat);
             tex.setWrap(Texture.WrapMode.Repeat);
             Material m = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
             m.setTexture("DiffuseMap", tex);
@@ -161,8 +163,10 @@ public class RenderAppState extends BaseAppState {
     }
 
     @Override
-    protected void onEnable() { }
+    protected void onEnable() {
+    }
 
     @Override
-    protected void onDisable() { }
+    protected void onDisable() {
+    }
 }

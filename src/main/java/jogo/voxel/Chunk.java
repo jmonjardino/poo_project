@@ -35,16 +35,41 @@ public class Chunk {
         this.node = new Node("Chunk_" + chunkX + "," + chunkY + "," + chunkZ);
     }
 
-    public Node getNode() { return node; }
-    public byte get(int x, int y, int z) { return vox[x][y][z]; }
-    public void set(int x, int y, int z, byte id) { vox[x][y][z] = id; }
-    public int getChunkX() { return chunkX; }
-    public int getChunkY() { return chunkY; }
-    public int getChunkZ() { return chunkZ; }
+    public Node getNode() {
+        return node;
+    }
 
-    public void markDirty() { dirty = true; }
-    public boolean isDirty() { return dirty; }
-    public void clearDirty() { dirty = false; }
+    public byte get(int x, int y, int z) {
+        return vox[x][y][z];
+    }
+
+    public void set(int x, int y, int z, byte id) {
+        vox[x][y][z] = id;
+    }
+
+    public int getChunkX() {
+        return chunkX;
+    }
+
+    public int getChunkY() {
+        return chunkY;
+    }
+
+    public int getChunkZ() {
+        return chunkZ;
+    }
+
+    public void markDirty() {
+        dirty = true;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void clearDirty() {
+        dirty = false;
+    }
 
     // Build and attach mesh for this chunk
     public void buildMesh(AssetManager assetManager, VoxelPalette palette) {
@@ -52,11 +77,12 @@ public class Chunk {
         node.detachAllChildren();
         Map<Byte, MeshBuilder> builders = new HashMap<>();
         for (int i = 0; i < palette.size(); i++) {
-            if (i == VoxelPalette.AIR_ID) continue;
+            if (i == VoxelPalette.AIR_ID)
+                continue;
             MeshBuilder mb = new MeshBuilder();
             // Randomize UVs only for dirt to add variation without per-block materials
             mb.setRandomizeUV(true);
-            builders.put((byte)i, mb);
+            builders.put((byte) i, mb);
         }
         // Track first block position for each type
         Map<Byte, Vec3> firstBlockPos = new HashMap<>();
@@ -64,20 +90,28 @@ public class Chunk {
             for (int y = 0; y < SIZE; y++) {
                 for (int z = 0; z < SIZE; z++) {
                     byte id = vox[x][y][z];
-                    if (id == VoxelPalette.AIR_ID) continue;
-                    if (!palette.get(id).isSolid()) continue;
+                    if (id == VoxelPalette.AIR_ID)
+                        continue;
+                    // Render even if not solid (e.g. leaves)
                     MeshBuilder builder = builders.get(id);
                     int wx = chunkX * SIZE + x;
                     int wy = chunkY * SIZE + y;
                     int wz = chunkZ * SIZE + z;
                     // Only add faces if neighbor is air or out of bounds
-                    if (!isSolid(wx+1,wy,wz,palette)) builder.addVoxelFace(wx,wy,wz, MeshBuilder.Face.PX);
-                    if (!isSolid(wx-1,wy,wz,palette)) builder.addVoxelFace(wx,wy,wz, MeshBuilder.Face.NX);
-                    if (!isSolid(wx,wy+1,wz,palette)) builder.addVoxelFace(wx,wy,wz, MeshBuilder.Face.PY);
-                    if (!isSolid(wx,wy-1,wz,palette)) builder.addVoxelFace(wx,wy,wz, MeshBuilder.Face.NY);
-                    if (!isSolid(wx,wy,wz+1,palette)) builder.addVoxelFace(wx,wy,wz, MeshBuilder.Face.PZ);
-                    if (!isSolid(wx,wy,wz-1,palette)) builder.addVoxelFace(wx,wy,wz, MeshBuilder.Face.NZ);
-                    if (!firstBlockPos.containsKey(id)) firstBlockPos.put(id, new Vec3(wx, wy, wz));
+                    if (!isSolid(wx + 1, wy, wz, palette))
+                        builder.addVoxelFace(wx, wy, wz, MeshBuilder.Face.PX);
+                    if (!isSolid(wx - 1, wy, wz, palette))
+                        builder.addVoxelFace(wx, wy, wz, MeshBuilder.Face.NX);
+                    if (!isSolid(wx, wy + 1, wz, palette))
+                        builder.addVoxelFace(wx, wy, wz, MeshBuilder.Face.PY);
+                    if (!isSolid(wx, wy - 1, wz, palette))
+                        builder.addVoxelFace(wx, wy, wz, MeshBuilder.Face.NY);
+                    if (!isSolid(wx, wy, wz + 1, palette))
+                        builder.addVoxelFace(wx, wy, wz, MeshBuilder.Face.PZ);
+                    if (!isSolid(wx, wy, wz - 1, palette))
+                        builder.addVoxelFace(wx, wy, wz, MeshBuilder.Face.NZ);
+                    if (!firstBlockPos.containsKey(id))
+                        firstBlockPos.put(id, new Vec3(wx, wy, wz));
                 }
             }
         }
@@ -87,8 +121,8 @@ public class Chunk {
             Mesh mesh = meshBuilder.build();
             if (mesh.getTriangleCount() > 0) {
                 byte id = entry.getKey();
-                Geometry g = new Geometry("chunk_"+chunkX+"_"+chunkY+"_"+chunkZ+"_"+id, mesh);
-                Vec3 blockPos = firstBlockPos.getOrDefault(id, new Vec3(chunkX*SIZE, chunkY*SIZE, chunkZ*SIZE));
+                Geometry g = new Geometry("chunk_" + chunkX + "_" + chunkY + "_" + chunkZ + "_" + id, mesh);
+                Vec3 blockPos = firstBlockPos.getOrDefault(id, new Vec3(chunkX * SIZE, chunkY * SIZE, chunkZ * SIZE));
                 Material mat = palette.get(id).getMaterial(assetManager, blockPos);
                 g.setMaterial(mat);
                 node.attachChild(g);
@@ -96,7 +130,8 @@ public class Chunk {
             }
         }
         long end = System.nanoTime();
-        System.out.println("Chunk ["+chunkX+","+chunkY+","+chunkZ+"] mesh built in " + ((end-start)/1_000_000.0) + " ms, geometries: " + geomCount);
+        System.out.println("Chunk [" + chunkX + "," + chunkY + "," + chunkZ + "] mesh built in "
+                + ((end - start) / 1_000_000.0) + " ms, geometries: " + geomCount);
     }
 
     /**
@@ -104,7 +139,8 @@ public class Chunk {
      */
     public void updatePhysics(PhysicsSpace space) {
         if (rigidBody != null) {
-            System.out.println("Removing old RigidBodyControl for chunk ["+chunkX+","+chunkY+","+chunkZ+"]");
+            System.out
+                    .println("Removing old RigidBodyControl for chunk [" + chunkX + "," + chunkY + "," + chunkZ + "]");
             space.remove(rigidBody);
             node.removeControl(rigidBody);
             rigidBody = null;
@@ -112,7 +148,8 @@ public class Chunk {
         if (node.getQuantity() > 0) { // Only add if chunk has geometry
             // Ensure node is attached to a parent (world node)
             if (node.getParent() == null) {
-                System.out.println("Warning: Chunk node ["+chunkX+","+chunkY+","+chunkZ+"] not attached to world node before physics update!");
+                System.out.println("Warning: Chunk node [" + chunkX + "," + chunkY + "," + chunkZ
+                        + "] not attached to world node before physics update!");
             }
             // Clone meshes for collision shape to avoid Bullet caching issues
             Node tempNode = node.clone(false); // shallow clone
@@ -128,19 +165,23 @@ public class Chunk {
             rigidBody = new RigidBodyControl(shape, 0f);
             node.addControl(rigidBody);
             space.add(rigidBody);
-            System.out.println("Added new RigidBodyControl for chunk ["+chunkX+","+chunkY+","+chunkZ+"]");
+            System.out.println("Added new RigidBodyControl for chunk [" + chunkX + "," + chunkY + "," + chunkZ + "]");
         }
     }
 
     // Helper for solid check in world coordinates
     private boolean isSolid(int wx, int wy, int wz, VoxelPalette palette) {
-        if (wx < 0 || wy < 0 || wz < 0) return false;
+        if (wx < 0 || wy < 0 || wz < 0)
+            return false;
         int max = SIZE * 1000; // arbitrary large world limit
-        if (wx >= max || wy >= max || wz >= max) return false;
+        if (wx >= max || wy >= max || wz >= max)
+            return false;
         int cx = wx / SIZE, cy = wy / SIZE, cz = wz / SIZE;
         int lx = wx % SIZE, ly = wy % SIZE, lz = wz % SIZE;
-        if (cx != chunkX || cy != chunkY || cz != chunkZ) return false; // only check within this chunk
-        if (lx < 0 || ly < 0 || lz < 0 || lx >= SIZE || ly >= SIZE || lz >= SIZE) return false;
+        if (cx != chunkX || cy != chunkY || cz != chunkZ)
+            return false; // only check within this chunk
+        if (lx < 0 || ly < 0 || lz < 0 || lx >= SIZE || ly >= SIZE || lz >= SIZE)
+            return false;
         byte id = vox[lx][ly][lz];
         return id != VoxelPalette.AIR_ID && palette.get(id).isSolid();
     }

@@ -21,6 +21,7 @@ public class HudAppState extends BaseAppState {
     private final PlayerAppState playerAppState;
     private int lastCapacity = -1;
     private float statusTTL = 0f;
+    private BitmapText healthText;
 
     public HudAppState(Node guiNode, AssetManager assetManager, PlayerAppState playerAppState) {
         this.guiNode = guiNode;
@@ -48,6 +49,11 @@ public class HudAppState extends BaseAppState {
         statusText.setSize(font.getCharSet().getRenderedSize());
         guiNode.attachChild(statusText);
         positionStatusText();
+
+        healthText = new BitmapText(font, false);
+        healthText.setSize(font.getCharSet().getRenderedSize());
+        guiNode.attachChild(healthText);
+        positionHealthText();
     }
 
     private void centerCrosshair() {
@@ -75,8 +81,29 @@ public class HudAppState extends BaseAppState {
         statusText.setLocalTranslation(x, y, 0);
     }
 
+    private void positionHealthText() {
+        SimpleApplication sapp = (SimpleApplication) getApplication();
+        int h = sapp.getCamera().getHeight();
+        float x = 10f;
+        float y = h - 50f; // Below status
+        healthText.setLocalTranslation(x, y, 0);
+    }
+
     private void updateInventoryText() {
         inventoryText.setText(inventorySummary());
+    }
+
+    private void updateHealthText() {
+        if (playerAppState != null && playerAppState.getPlayer() != null) {
+            int hp = playerAppState.getPlayer().getHealth();
+            healthText.setText("Health: " + hp);
+            if (hp > 50)
+                healthText.setColor(com.jme3.math.ColorRGBA.Green);
+            else if (hp > 20)
+                healthText.setColor(com.jme3.math.ColorRGBA.Orange);
+            else
+                healthText.setColor(com.jme3.math.ColorRGBA.Red);
+        }
     }
 
     private String inventorySummary() {
@@ -129,9 +156,12 @@ public class HudAppState extends BaseAppState {
         centerCrosshair();
         updateInventoryText();
         positionInventoryText();
+        updateHealthText();
+        positionHealthText();
         if (statusTTL > 0f) {
             statusTTL -= tpf;
-            if (statusTTL <= 0f) statusText.setText("");
+            if (statusTTL <= 0f)
+                statusText.setText("");
         }
     }
 
@@ -143,6 +173,8 @@ public class HudAppState extends BaseAppState {
             inventoryText.removeFromParent();
         if (statusText != null)
             statusText.removeFromParent();
+        if (healthText != null)
+            healthText.removeFromParent();
     }
 
     @Override

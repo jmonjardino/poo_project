@@ -13,17 +13,25 @@ public class Enemy extends Character implements HasAI {
 
     /** Força base do inimigo usada para calcular dano de ataque. */
     private float strength;
-    /** Poder de envenenamento base do inimigo usada para calcular dano de envenenamento. */
+    /**
+     * Poder de envenenamento base do inimigo usada para calcular dano de
+     * envenenamento.
+     */
     private float poison;
     /** Distância máxima para seguir o jogador. */
     public float chaseRange = 15f;
     /** Distancia maxima para atacar o jogador */
     public float attackRange = 3f;
-    /**Possíveis estados do inimigo */
-    private enum enemyState {IDLE, CHASE, ATTACK};
+
+    /** Possíveis estados do inimigo */
+    private enum enemyState {
+        IDLE, CHASE, ATTACK
+    };
+
     /** Estado atual do inimigo. */
     private enemyState state = enemyState.IDLE;
-    
+    private float attackCooldown = 0f;
+    private float ATTACK_DELAY = 1f;
 
     /**
      * Constrói um inimigo com um nome de apresentação.
@@ -61,6 +69,11 @@ public class Enemy extends Character implements HasAI {
 
     @Override
     public void updateAI(AIContext context) {
+
+        if (attackCooldown > 0) {
+            attackCooldown -= context.tpf;
+        }
+
         double dist = context.distanceXZ(getPosition());
 
         if (dist <= attackRange) {
@@ -71,6 +84,11 @@ public class Enemy extends Character implements HasAI {
             setPosition(getPosition().x + step.x, getPosition().y + step.y, getPosition().z + step.z);
         } else if (dist > chaseRange) {
             state = enemyState.IDLE;
+        }
+
+        if (attackCooldown <= 0 && state == enemyState.ATTACK) {
+            context.playerRef.takeDamage((int) this.strength);
+            attackCooldown = ATTACK_DELAY;
         }
     }
 

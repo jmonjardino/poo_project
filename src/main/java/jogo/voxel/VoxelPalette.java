@@ -38,6 +38,8 @@ public class VoxelPalette {
         p.register(new WoodBlockType()); // id 2
         p.register(new DirtBlockType()); // id 3
         p.register(new SandBlockType()); // id 4
+        p.register(new jogo.voxel.blocks.LeavesBlockType()); // id 5
+        p.register(new jogo.voxel.blocks.LogBlockType()); // id 6
         return p;
     }
 
@@ -46,4 +48,6 @@ public class VoxelPalette {
     public static final byte WOOD_ID = 2;
     public static final byte DIRT_ID = 3;
     public static final byte SAND_ID = 4;
+    public static final byte LEAVES_ID = 5;
+    public static final byte LOG_ID = 6;
 }
