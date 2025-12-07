@@ -23,7 +23,7 @@ public class WorldAppState extends BaseAppState {
     private final InputAppState input;
     private PlayerAppState playerAppState;
 
-    // world root for easy cleanup
+    // raiz do mundo para limpeza fácil
     private Node worldNode;
     private VoxelWorld voxelWorld;
     private com.jme3.math.Vector3f spawnPosition;
@@ -46,18 +46,18 @@ public class WorldAppState extends BaseAppState {
         worldNode = new Node("World");
         rootNode.attachChild(worldNode);
 
-        // Lighting
+        // Iluminação
         AmbientLight ambient = new AmbientLight();
-        ambient.setColor(ColorRGBA.White.mult(0.20f)); // slightly increased ambient
+        ambient.setColor(ColorRGBA.White.mult(0.20f)); // ambiente ligeiramente aumentado
         worldNode.addLight(ambient);
 
         DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-0.35f, -1.3f, -0.25f).normalizeLocal()); // more top-down to reduce harsh
-                                                                                // contrast
-        sun.setColor(ColorRGBA.White.mult(0.85f)); // slightly dimmer sun
+        sun.setDirection(new Vector3f(-0.35f, -1.3f, -0.25f).normalizeLocal()); // mais de cima para baixo para reduzir
+                                                                                // contraste forte
+        sun.setColor(ColorRGBA.White.mult(0.85f)); // sol ligeiramente mais fraco
         worldNode.addLight(sun);
 
-        // Voxel world 16x16x16 (reduced size for simplicity)
+        // Mundo Voxel 16x16x16 (tamanho reduzido para simplicidade)
         voxelWorld = new VoxelWorld(assetManager, 320, 32, 320);
         voxelWorld.generateLayers();
         voxelWorld.buildMeshes();
@@ -65,7 +65,7 @@ public class WorldAppState extends BaseAppState {
         worldNode.attachChild(voxelWorld.getNode());
         voxelWorld.buildPhysics(physicsSpace);
 
-        // compute recommended spawn
+        // calcular spawn recomendado
         spawnPosition = voxelWorld.getRecommendedSpawn();
     }
 
@@ -83,7 +83,7 @@ public class WorldAppState extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        // Mining logic moved to InteractionAppState for progressive breaking
+        // Lógica de mineração movida para InteractionAppState para quebra progressiva
         if (input != null && input.consumeToggleShadingRequested()) {
             voxelWorld.toggleRenderDebug();
         }
@@ -92,7 +92,7 @@ public class WorldAppState extends BaseAppState {
     @Override
     protected void cleanup(Application app) {
         if (worldNode != null) {
-            // Remove all physics controls under worldNode
+            // Remover todos os controlos de física sob worldNode
             worldNode.depthFirstTraversal(spatial -> {
                 RigidBodyControl rbc = spatial.getControl(RigidBodyControl.class);
                 if (rbc != null) {

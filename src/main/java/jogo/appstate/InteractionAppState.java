@@ -13,6 +13,8 @@ import jogo.engine.GameRegistry;
 import jogo.gameobject.character.Player;
 import jogo.gameobject.item.BreakableItem;
 import jogo.gameobject.item.Item;
+import jogo.gameobject.item.Stick;
+import jogo.gameobject.item.Axe;
 import jogo.gameobject.Wood;
 import jogo.gameobject.GameObject;
 import jogo.voxel.VoxelWorld;
@@ -29,7 +31,7 @@ public class InteractionAppState extends BaseAppState {
     private final WorldAppState world;
     private float reach = 5.5f;
 
-    // State for progressive mining
+    // Estado para mineração progressiva
     private jogo.voxel.VoxelWorld.Vector3i lastHitBlock = null;
     private int hitCount = 0;
 
@@ -58,7 +60,23 @@ public class InteractionAppState extends BaseAppState {
         Ray ray = new Ray(origin, dir);
         ray.setLimit(reach);
 
-        // 1) Interact (Generic Button: E) -> Pick up Items
+        // 0) Seleção de Slot (1-4) - apenas se não estiver em modo de crafting
+        // (verificação simplificada)
+        if (playerAppState != null) {
+            Player p = playerAppState.getPlayer();
+            if (p != null) {
+                if (input.consumeCraftRecipe1Requested())
+                    p.setSelectedSlot(0);
+                if (input.consumeCraftRecipe2Requested())
+                    p.setSelectedSlot(1);
+                if (input.consumeCraftRecipe3Requested())
+                    p.setSelectedSlot(2);
+                if (input.consumeCraftRecipe4Requested())
+                    p.setSelectedSlot(3);
+            }
+        }
+
+        // 1) Interagir (Botão Genérico: E) -> Apanhar Itens
         if (input.consumeInteractRequested()) {
             CollisionResults results = new CollisionResults();
             rootNode.collideWith(ray, results);
@@ -83,13 +101,13 @@ public class InteractionAppState extends BaseAppState {
             }
         }
 
-        // 2) Break (Left Click) -> Mine Voxels
+        // 2) Partir (Clique Esquerdo) -> Minar Vóxeis
         if (input.consumeBreakRequested()) {
             VoxelWorld vw = world != null ? world.getVoxelWorld() : null;
             if (vw != null) {
                 vw.pickFirstSolid(cam, reach).ifPresent(hit -> {
                     VoxelWorld.Vector3i cell = hit.cell;
-                    // Check if same block as before
+                    // Verificar se é o mesmo bloco de antes
                     if (lastHitBlock == null || cell.x != lastHitBlock.x || cell.y != lastHitBlock.y
                             || cell.z != lastHitBlock.z) {
                         lastHitBlock = cell;
@@ -101,12 +119,17 @@ public class InteractionAppState extends BaseAppState {
                     int requiredHits = 1;
                     int dropType = -1;
 
+                    // Verificar eficiência da ferramenta
+                    Player p = playerAppState != null ? playerAppState.getPlayer() : null;
+                    int heldItem = (p != null) ? p.getInventory().getItemTypeAt(p.getSelectedSlot()) : 0;
+                    boolean isAxe = (heldItem == 400);
+
                     if (id == VoxelPalette.LOG_ID) {
-                        requiredHits = 4;
-                        dropType = 200; // Wood Item
+                        requiredHits = isAxe ? 2 : 4;
+                        dropType = 200; // Item Madeira
                     } else if (id == VoxelPalette.DIRT_ID) {
                         requiredHits = 3;
-                        dropType = 300; // Dirt Item
+                        dropType = 300; // Item Terra
                     } else if (id == VoxelPalette.STONE_ID) {
                         requiredHits = 6;
                     } else if (id == VoxelPalette.LEAVES_ID) {
@@ -124,12 +147,50 @@ public class InteractionAppState extends BaseAppState {
                                 playerAppState.getPlayer().getInventory().add(dropType, 1);
                                 System.out.println("Mined item type: " + dropType);
                             }
-                            // Reset
+                            // Reiniciar
                             hitCount = 0;
                             lastHitBlock = null;
                         }
                     }
                 });
+            }
+        }
+
+        // 3) Colocar (Clique Direito) -> Colocar Vóxeis
+        if (input.consumePlaceRequested()) {
+            VoxelWorld vw = world != null ? world.getVoxelWorld() : null;
+            Player p = playerAppState != null ? playerAppState.getPlayer() : null;
+            if (vw != null && p != null) {
+                int slot = p.getSelectedSlot();
+                int type = p.getInventory().getItemTypeAt(slot);
+                if (type > 0) {
+                    byte blockToPlace = 0;
+                    if (type == 300)
+                        blockToPlace = VoxelPalette.DIRT_ID;
+                    else if (type == 200)
+                        blockToPlace = VoxelPalette.LOG_ID;
+                    else if (type == 210)
+                        blockToPlace = VoxelPalette.WOOD_ID;
+
+                    if (blockToPlace > 0) {
+                        final byte finalBlockToPlace = blockToPlace; // efetivamente final para lambda
+                        vw.pickFirstSolid(cam, reach).ifPresent(hit -> {
+                            // Colocar contra a face
+                            int tx = hit.cell.x + (int) hit.normal.x;
+                            int ty = hit.cell.y + (int) hit.normal.y;
+                            int tz = hit.cell.z + (int) hit.normal.z;
+
+                            // Garantir que o alvo está vazio (ar) antes de colocar
+                            if (vw.getBlock(tx, ty, tz) == VoxelPalette.AIR_ID) {
+                                vw.setBlock(tx, ty, tz, finalBlockToPlace);
+                                vw.rebuildDirtyChunks(world.getPhysicsSpace());
+                                playerAppState.refreshPhysics();
+                                p.getInventory().removeAt(slot, 1);
+                                System.out.println("Placed block " + finalBlockToPlace);
+                            }
+                        });
+                    }
+                }
             }
         }
     }
@@ -146,6 +207,10 @@ public class InteractionAppState extends BaseAppState {
     }
 
     private int itemTypeFor(Item item) {
+        if (item instanceof Axe)
+            return 400;
+        if (item instanceof Stick)
+            return 220;
         if (item instanceof BreakableItem)
             return 100;
         if (item instanceof Wood)

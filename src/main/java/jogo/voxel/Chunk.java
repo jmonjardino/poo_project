@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents a chunk of the voxel world (e.g., 16x16x16 blocks).
+ * Representa um chunk do mundo voxel (ex: blocos de 16x16x16).
  */
 public class Chunk {
     public static final int SIZE = 16;
@@ -71,7 +71,7 @@ public class Chunk {
         dirty = false;
     }
 
-    // Build and attach mesh for this chunk
+    // Construir e anexar malha para este chunk
     public void buildMesh(AssetManager assetManager, VoxelPalette palette) {
         long start = System.nanoTime();
         node.detachAllChildren();
@@ -80,11 +80,12 @@ public class Chunk {
             if (i == VoxelPalette.AIR_ID)
                 continue;
             MeshBuilder mb = new MeshBuilder();
-            // Randomize UVs only for dirt to add variation without per-block materials
+            // Aleatorizar UVs apenas para terra para adicionar variação sem materiais por
+            // bloco
             mb.setRandomizeUV(true);
             builders.put((byte) i, mb);
         }
-        // Track first block position for each type
+        // Rastrear posição do primeiro bloco para cada tipo
         Map<Byte, Vec3> firstBlockPos = new HashMap<>();
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
@@ -92,12 +93,12 @@ public class Chunk {
                     byte id = vox[x][y][z];
                     if (id == VoxelPalette.AIR_ID)
                         continue;
-                    // Render even if not solid (e.g. leaves)
+                    // Renderizar mesmo se não for sólido (ex: folhas)
                     MeshBuilder builder = builders.get(id);
                     int wx = chunkX * SIZE + x;
                     int wy = chunkY * SIZE + y;
                     int wz = chunkZ * SIZE + z;
-                    // Only add faces if neighbor is air or out of bounds
+                    // Adicionar faces apenas se o vizinho for ar ou fora dos limites
                     if (!isSolid(wx + 1, wy, wz, palette))
                         builder.addVoxelFace(wx, wy, wz, MeshBuilder.Face.PX);
                     if (!isSolid(wx - 1, wy, wz, palette))
@@ -135,7 +136,8 @@ public class Chunk {
     }
 
     /**
-     * Updates the physics control for this chunk. Call after mesh rebuild.
+     * Atualiza o controlo de física para este chunk. Chamar após reconstrução da
+     * malha.
      */
     public void updatePhysics(PhysicsSpace space) {
         if (rigidBody != null) {
@@ -145,14 +147,14 @@ public class Chunk {
             node.removeControl(rigidBody);
             rigidBody = null;
         }
-        if (node.getQuantity() > 0) { // Only add if chunk has geometry
-            // Ensure node is attached to a parent (world node)
+        if (node.getQuantity() > 0) { // Adicionar apenas se o chunk tiver geometria
+            // Garantir que o nó está anexado a um pai (nó do mundo)
             if (node.getParent() == null) {
                 System.out.println("Warning: Chunk node [" + chunkX + "," + chunkY + "," + chunkZ
                         + "] not attached to world node before physics update!");
             }
-            // Clone meshes for collision shape to avoid Bullet caching issues
-            Node tempNode = node.clone(false); // shallow clone
+            // Clonar malhas para forma de colisão para evitar problemas de cache do Bullet
+            Node tempNode = node.clone(false); // clone superficial
             for (int i = 0; i < node.getQuantity(); i++) {
                 if (node.getChild(i) instanceof Geometry) {
                     Geometry g = (Geometry) node.getChild(i);
@@ -169,17 +171,17 @@ public class Chunk {
         }
     }
 
-    // Helper for solid check in world coordinates
+    // Auxiliar para verificação de solidez em coordenadas do mundo
     private boolean isSolid(int wx, int wy, int wz, VoxelPalette palette) {
         if (wx < 0 || wy < 0 || wz < 0)
             return false;
-        int max = SIZE * 1000; // arbitrary large world limit
+        int max = SIZE * 1000; // limite de mundo arbitrariamente grande
         if (wx >= max || wy >= max || wz >= max)
             return false;
         int cx = wx / SIZE, cy = wy / SIZE, cz = wz / SIZE;
         int lx = wx % SIZE, ly = wy % SIZE, lz = wz % SIZE;
         if (cx != chunkX || cy != chunkY || cz != chunkZ)
-            return false; // only check within this chunk
+            return false; // verificar apenas dentro deste chunk
         if (lx < 0 || ly < 0 || lz < 0 || lx >= SIZE || ly >= SIZE || lz >= SIZE)
             return false;
         byte id = vox[lx][ly][lz];

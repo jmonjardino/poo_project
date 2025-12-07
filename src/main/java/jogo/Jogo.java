@@ -22,18 +22,18 @@ import jogo.gameobject.character.Enemy;
 import jogo.gameobject.character.Ally;
 
 /**
- * Main application entry.
+ * Entrada principal da aplicação.
  */
 public class Jogo extends SimpleApplication {
 
     public static void main(String[] args) {
         Jogo app = new Jogo();
-        app.setShowSettings(true); // show settings dialog
+        app.setShowSettings(true); // mostrar diálogo de configurações
         AppSettings settings = new AppSettings(true);
         settings.setTitle("Test");
         settings.setWidth(1280);
         settings.setHeight(720);
-        settings.setGammaCorrection(true); // enable sRGB gamma-correct rendering
+        settings.setGammaCorrection(true); // ativar renderização com correção gama sRGB
         app.setSettings(settings);
         app.start();
     }
@@ -42,37 +42,38 @@ public class Jogo extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        // disable flyCam, we manage camera ourselves
+        // desativar flyCam, nós gerimos a câmara
         flyCam.setEnabled(false);
         inputManager.setCursorVisible(false);
-        viewPort.setBackgroundColor(new ColorRGBA(0.6f, 0.75f, 1f, 1f)); // sky-like
+        viewPort.setBackgroundColor(new ColorRGBA(0.6f, 0.75f, 1f, 1f)); // tipo céu
 
         assetManager.registerLocator("src/main/java/assets", com.jme3.asset.plugins.FileLocator.class);
 
-        // Physics
+        // Física
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        bulletAppState.setDebugEnabled(false); // toggle off later
+        bulletAppState.setDebugEnabled(false); // desligar mais tarde
         PhysicsSpace physicsSpace = bulletAppState.getPhysicsSpace();
 
-        // AppStates (order matters a bit: input -> world -> render -> interaction ->
+        // AppStates (a ordem importa: input -> world -> render -> interaction ->
         // player)
-        // Order ensures input is available, world is initialized before spawn queries,
-        // and render/interaction can index registered objects.
+        // A ordem garante que o input está disponível, o mundo inicializado antes de
+        // queries de spawn,
+        // e render/interaction podem indexar objetos registados.
         InputAppState input = new InputAppState();
         stateManager.attach(input);
 
-        // Engine registry must exist before world
+        // Registo do motor deve existir antes do mundo
         GameRegistry registry = new GameRegistry();
 
         WorldAppState world = new WorldAppState(rootNode, assetManager, physicsSpace, cam, input, registry);
         stateManager.attach(world);
 
-        // Engine render layers
+        // Camadas de renderização do motor
         RenderIndex renderIndex = new RenderIndex();
         stateManager.attach(new RenderAppState(rootNode, assetManager, registry, renderIndex, world));
 
-        // Demo objects moved below after player attached
+        // Objetos de demonstração movidos para baixo após anexar jogador
 
         PlayerAppState player = new PlayerAppState(rootNode, assetManager, cam, input, physicsSpace, world);
         stateManager.attach(player);
@@ -83,12 +84,15 @@ public class Jogo extends SimpleApplication {
         AIAppState ai = new AIAppState(player, world, registry);
         stateManager.attach(ai);
 
-        // Place demo items AFTER player attach using a single spawn reference.
-        // This avoids using a fallback spawn before the world is fully initialized
-        // and keeps items close to the player's starting area.
+        // Colocar itens de demonstração APÓS anexar jogador usando uma referência de
+        // spawn única.
+        // Isto evita usar um spawn de recurso antes do mundo estar totalmente
+        // inicializado
+        // e mantém itens próximos da área inicial do jogador.
 
-        // Manual spawn near center of world (320x320)
-        // Height (ty) set to 35 to fall safely onto terrain (max height ~24)
+        // Spawn manual perto do centro do mundo (320x320)
+        // Altura (ty) definida para 35 para cair em segurança no terreno (altura máx
+        // ~24)
         int sx = 160;
         int sz = 160;
         int ty = 35;
@@ -117,13 +121,13 @@ public class Jogo extends SimpleApplication {
         ally.setPosition(sx - 40, ty + 1, sz - 40);
         registry.add(ally);
 
-        // Post-processing: SSAO for subtle contact shadows
+        // Pós-processamento: SSAO para sombras de contacto subtis
         try {
             FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
             Class<?> ssaoCls = Class.forName("com.jme3.post.ssao.SSAOFilter");
             Object ssao = ssaoCls.getConstructor(float.class, float.class, float.class, float.class)
-                    .newInstance(2.1f, 0.6f, 0.5f, 0.02f); // radius, intensity, scale, bias
-            // Add filter via reflection to avoid compile-time dependency
+                    .newInstance(2.1f, 0.6f, 0.5f, 0.02f); // raio, intensidade, escala, viés
+            // Adicionar filtro via reflexão para evitar dependência de compilação
             java.lang.reflect.Method addFilter = FilterPostProcessor.class.getMethod("addFilter",
                     Class.forName("com.jme3.post.Filter"));
             addFilter.invoke(fpp, ssao);

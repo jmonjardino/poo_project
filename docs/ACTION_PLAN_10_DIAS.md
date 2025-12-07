@@ -141,3 +141,19 @@ Objetivo: concluir um jogo funcional e avaliável segundo o PRD, cumprindo os m�
 - `pickFirstSolid(cam, reach)` devolve `Hit`: usar `cell`, `normal`, `distance` para “break” e “place block”.
 - Exceções devem propagar e ser registadas (logs/GUI).
 - Geração deve ser reprodutível; evitar aleatório sem seed.
+
+## Sessão de Trabalho — Crafting e Interação (Realizado)
+- **Crafting**:
+  - Implementados itens `Stick` (Pau) e `Axe` (Machado).
+  - Receitas adicionadas: 2 Tábuas -> 4 Paus; 3 Tábuas + 2 Paus -> 1 Machado.
+  - Machado `Axe` requer `Workbench` (Bancada) no inventário para ser fabricado (não consumido).
+  - Menu de crafting (tecla `C`) filtra receitas baseadas nos materiais disponíveis.
+- **Interação e Equipamento**:
+  - Seleção de slot de inventário implementada (Teclas `1-4`).
+  - HUD atualizado para mostrar o slot selecionado.
+- **Colocação de Blocos (Place)**:
+  - Clique Direito (`Mouse Right`) para colocar blocos.
+  - Itens suportados: `Dirt` (Terra), `Wood` (Tronco), `Planks` (Madeira).
+- **Eficiência de Ferramentas**:
+  - Machado (`Axe`) aumenta a velocidade de mineração de Troncos (`Log`) (2 hits em vez de 4).
+  - Lógica implementada em `InteractionAppState`.

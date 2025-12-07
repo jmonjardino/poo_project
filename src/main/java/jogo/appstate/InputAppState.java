@@ -18,6 +18,7 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     private boolean sprint;
     private volatile boolean jumpRequested;
     private volatile boolean breakRequested;
+    private volatile boolean placeRequested;
     private volatile boolean toggleShadingRequested;
     private volatile boolean respawnRequested;
     private volatile boolean interactRequested;
@@ -25,43 +26,48 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     private volatile boolean craftRequested;
     private volatile boolean craftRecipe1Requested;
     private volatile boolean craftRecipe2Requested;
+    private volatile boolean craftRecipe3Requested;
+    private volatile boolean craftRecipe4Requested;
     private float mouseDX, mouseDY;
     private boolean mouseCaptured = true;
 
     @Override
     protected void initialize(Application app) {
         var im = app.getInputManager();
-        // Movement keys
+        // Teclas de movimento
         im.addMapping("MoveForward", new KeyTrigger(KeyInput.KEY_W));
         im.addMapping("MoveBackward", new KeyTrigger(KeyInput.KEY_S));
         im.addMapping("MoveLeft", new KeyTrigger(KeyInput.KEY_A));
         im.addMapping("MoveRight", new KeyTrigger(KeyInput.KEY_D));
         im.addMapping("Jump", new KeyTrigger(KeyInput.KEY_SPACE));
         im.addMapping("Sprint", new KeyTrigger(KeyInput.KEY_LSHIFT));
-        // Mouse look
+        // Olhar com o rato
         im.addMapping("MouseX+", new MouseAxisTrigger(MouseInput.AXIS_X, false));
         im.addMapping("MouseX-", new MouseAxisTrigger(MouseInput.AXIS_X, true));
         im.addMapping("MouseY+", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
         im.addMapping("MouseY-", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
-        // Toggle capture (use TAB, ESC exits app by default)
+        // Alternar captura (usar TAB, ESC sai da aplicação por omissão)
         im.addMapping("ToggleMouse", new KeyTrigger(KeyInput.KEY_TAB));
-        // Break voxel (left mouse)
+        // Partir vóxel (rato esquerdo)
         im.addMapping("Break", new MouseButtonTrigger(com.jme3.input.MouseInput.BUTTON_LEFT));
-        // Toggle shading (L)
+        im.addMapping("Place", new MouseButtonTrigger(com.jme3.input.MouseInput.BUTTON_RIGHT));
+        // Alternar sombreamento (L)
         im.addMapping("ToggleShading", new KeyTrigger(KeyInput.KEY_L));
-        // Respawn (R)
+        // Renascer (R)
         im.addMapping("Respawn", new KeyTrigger(KeyInput.KEY_R));
-        // Interact (E)
+        // Interagir (E)
         im.addMapping("Interact", new KeyTrigger(KeyInput.KEY_E));
-        // Print coordinates (O)
+        // Imprimir coordenadas (O)
         im.addMapping("PrintCoords", new KeyTrigger(KeyInput.KEY_O));
         im.addMapping("Craft", new KeyTrigger(KeyInput.KEY_C));
         im.addMapping("CraftRecipe1", new KeyTrigger(KeyInput.KEY_1));
         im.addMapping("CraftRecipe2", new KeyTrigger(KeyInput.KEY_2));
+        im.addMapping("CraftRecipe3", new KeyTrigger(KeyInput.KEY_3));
+        im.addMapping("CraftRecipe4", new KeyTrigger(KeyInput.KEY_4));
 
         im.addListener(this, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight", "Jump", "Sprint", "ToggleMouse",
-                "Break", "ToggleShading", "Respawn", "Interact", "PrintCoords", "Craft", "CraftRecipe1",
-                "CraftRecipe2");
+                "Break", "Place", "ToggleShading", "Respawn", "Interact", "PrintCoords", "Craft", "CraftRecipe1",
+                "CraftRecipe2", "CraftRecipe3", "CraftRecipe4");
         im.addListener(this, "MouseX+", "MouseX-", "MouseY+", "MouseY-");
     }
 
@@ -80,12 +86,15 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.deleteMapping("MouseY-");
         im.deleteMapping("ToggleMouse");
         im.deleteMapping("Break");
+        im.deleteMapping("Place");
         im.deleteMapping("ToggleShading");
         im.deleteMapping("Respawn");
         im.deleteMapping("Interact");
         im.deleteMapping("Craft");
         im.deleteMapping("CraftRecipe1");
         im.deleteMapping("CraftRecipe2");
+        im.deleteMapping("CraftRecipe3");
+        im.deleteMapping("CraftRecipe4");
         im.removeListener(this);
     }
 
@@ -118,6 +127,10 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
                 if (isPressed && mouseCaptured)
                     breakRequested = true;
             }
+            case "Place" -> {
+                if (isPressed && mouseCaptured)
+                    placeRequested = true;
+            }
             case "ToggleShading" -> {
                 if (isPressed)
                     toggleShadingRequested = true;
@@ -146,6 +159,14 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
                 if (isPressed)
                     craftRecipe2Requested = true;
             }
+            case "CraftRecipe3" -> {
+                if (isPressed)
+                    craftRecipe3Requested = true;
+            }
+            case "CraftRecipe4" -> {
+                if (isPressed)
+                    craftRecipe4Requested = true;
+            }
         }
     }
 
@@ -164,7 +185,7 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     public Vector3f getMovementXZ() {
         float fb = (forward ? 1f : 0f) + (backward ? -1f : 0f);
         float lr = (right ? 1f : 0f) + (left ? -1f : 0f);
-        return new Vector3f(lr, 0f, -fb); // -fb so forward maps to -Z in JME default
+        return new Vector3f(lr, 0f, -fb); // -fb para que frente mapeie para -Z no padrão JME
     }
 
     public boolean isSprinting() {
@@ -180,6 +201,12 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     public boolean consumeBreakRequested() {
         boolean r = breakRequested;
         breakRequested = false;
+        return r;
+    }
+
+    public boolean consumePlaceRequested() {
+        boolean r = placeRequested;
+        placeRequested = false;
         return r;
     }
 
@@ -212,7 +239,7 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         this.mouseCaptured = captured;
         var im = getApplication().getInputManager();
         im.setCursorVisible(!captured);
-        // Clear accumulated deltas when switching state
+        // Limpar deltas acumulados ao trocar de estado
         mouseDX = 0f;
         mouseDY = 0f;
     }
@@ -242,6 +269,18 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     public boolean consumeCraftRecipe2Requested() {
         boolean r = craftRecipe2Requested;
         craftRecipe2Requested = false;
+        return r;
+    }
+
+    public boolean consumeCraftRecipe3Requested() {
+        boolean r = craftRecipe3Requested;
+        craftRecipe3Requested = false;
+        return r;
+    }
+
+    public boolean consumeCraftRecipe4Requested() {
+        boolean r = craftRecipe4Requested;
+        craftRecipe4Requested = false;
         return r;
     }
 }

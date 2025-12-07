@@ -85,7 +85,7 @@ public class HudAppState extends BaseAppState {
         SimpleApplication sapp = (SimpleApplication) getApplication();
         int h = sapp.getCamera().getHeight();
         float x = 10f;
-        float y = h - 50f; // Below status
+        float y = h - 50f; // Abaixo do estado
         healthText.setLocalTranslation(x, y, 0);
     }
 
@@ -109,40 +109,49 @@ public class HudAppState extends BaseAppState {
     private String inventorySummary() {
         Player p = playerAppState != null ? playerAppState.getPlayer() : null;
         if (p == null)
-            return "Inv (n/a)";
+            return "Inv: (Player null)";
+
         var inv = p.getInventory();
         int cap = inv.capacity();
-        java.util.LinkedHashMap<Integer, Integer> totals = new java.util.LinkedHashMap<>();
+        int selected = p.getSelectedSlot();
+
+        StringBuilder sb = new StringBuilder("Inv:\n");
         for (int i = 0; i < cap; i++) {
             int type = inv.getItemTypeAt(i);
             int count = inv.getCountAt(i);
-            if (type > 0 && count > 0)
-                totals.merge(type, count, Integer::sum);
-        }
-        if (totals.isEmpty())
-            return "Inv (vazio)";
-        StringBuilder sb = new StringBuilder();
-        sb.append("Inv ");
-        boolean first = true;
-        for (var e : totals.entrySet()) {
-            if (!first)
-                sb.append(", ");
-            first = false;
-            sb.append(nameForType(e.getKey())).append(": ").append(e.getValue());
+
+            if (i == selected)
+                sb.append(">");
+            else
+                sb.append(" ");
+
+            sb.append(i + 1).append(": ");
+            if (type > 0 && count > 0) {
+                sb.append(nameForType(type)).append(" x").append(count);
+            } else {
+                sb.append("---");
+            }
+            sb.append("\n");
         }
         return sb.toString();
     }
 
     private String nameForType(int type) {
         if (type == 100)
-            return "Axe";
+            return "Tool";
         if (type == 200)
             return "Wood";
         if (type == 210)
             return "Planks";
+        if (type == 220)
+            return "Stick";
         if (type == 300)
+            return "Dirt";
+        if (type == 310)
             return "Workbench";
-        return "Item";
+        if (type == 400)
+            return "Axe";
+        return "Item " + type;
     }
 
     public void showStatus(String msg, float ttl) {

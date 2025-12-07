@@ -58,7 +58,7 @@ public class RenderAppState extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        // Ensure each registered object has a spatial and sync position
+        // Garantir que cada objeto registado tem um spatial e posição sincronizada
         var current = registry.getAll();
         Set<GameObject> alive = new HashSet<>(current);
 
@@ -81,8 +81,8 @@ public class RenderAppState extends BaseAppState {
                         int topY = vw.getTopSolidY((int) p.x, (int) p.z);
                         if (topY >= 0) {
                             float targetY = topY + 1f;
-                            // Check difference to avoid float precision jitter, set to targetY (ground
-                            // level)
+                            // Verificar diferença para evitar instabilidade de precisão float, definir para
+                            // targetY (nível do solo)
                             if (Math.abs(p.y - targetY) > 0.01f) {
                                 obj.setPosition(p.x, targetY, p.z);
                                 p = obj.getPosition();
@@ -94,7 +94,7 @@ public class RenderAppState extends BaseAppState {
             }
         }
 
-        // Cleanup: remove spatials for objects no longer in registry
+        // Limpeza: remover spatials para objetos que já não estão no registo
         var it = instances.entrySet().iterator();
         while (it.hasNext()) {
             var e = it.next();
@@ -109,16 +109,16 @@ public class RenderAppState extends BaseAppState {
     }
 
     private Spatial createSpatialFor(GameObject obj) {
-        // TODO This could be set inside each GameObject!
+        // TODO Isto poderia ser definido dentro de cada GameObject!
         if (obj instanceof Player) {
             Geometry g = new Geometry(obj.getName(), new Cylinder(16, 16, 0.35f, 1.4f, true));
             g.setMaterial(colored(ColorRGBA.Green));
             return g;
         } else if (obj instanceof Enemy) {
-            // Updated to use SkinUtils and correct path (skins/cena_estranha.png)
+            // Atualizado para usar SkinUtils e caminho correto (skins/cena_estranha.png)
             return jogo.util.SkinUtils.createCharacterModel(assetManager, "skins/cena_estranha.png");
         } else if (obj instanceof Ally) {
-            // Temporarily use same skin or ally.jpg if it exists
+            // Usar temporariamente a mesma skin ou ally.jpg se existir
             return jogo.util.SkinUtils.createCharacterModel(assetManager, "skins/ally.png");
         } else if (obj instanceof Wood) {
             Geometry g = new Geometry(obj.getName(), new Box(0.3f, 0.3f, 0.3f));

@@ -16,7 +16,19 @@ public class Player extends Character {
         this.inventory = new StackingInventory(8, 64);
     }
 
+    private int selectedSlot = 0;
+
     public StackingInventory getInventory() {
         return inventory;
+    }
+
+    public int getSelectedSlot() {
+        return selectedSlot;
+    }
+
+    public void setSelectedSlot(int slot) {
+        if (slot >= 0 && slot < inventory.capacity()) {
+            this.selectedSlot = slot;
+        }
     }
 }

@@ -28,11 +28,11 @@ public class VoxelWorld {
     private final Map<Byte, Geometry> geoms = new HashMap<>();
     private final Map<Byte, Material> materials = new HashMap<>();
 
-    private boolean lit = true; // Shading: On by default
-    private boolean wireframe = false; // Wireframe: Off by default
-    private boolean culling = true; // Culling: On by default
-    private int groundHeight = 8; // baseline Y level
-    private int seed = 123456; // Default seed
+    private boolean lit = true; // Sombreamento: Ligado por omissão
+    private boolean wireframe = false; // Wireframe: Desligado por omissão
+    private boolean culling = true; // Culling: Ligado por omissão
+    private int groundHeight = 8; // nível base Y
+    private int seed = 123456; // Semente por omissão
 
     private final int chunkSize = Chunk.SIZE;
     private final int chunkCountX, chunkCountY, chunkCountZ;
@@ -55,7 +55,7 @@ public class VoxelWorld {
         initMaterials();
     }
 
-    // Helper to get chunk and local coordinates
+    // Auxiliar para obter chunk e coordenadas locais
     private Chunk getChunk(int x, int y, int z) {
         int cx = x / chunkSize;
         int cy = y / chunkSize;
@@ -77,7 +77,7 @@ public class VoxelWorld {
         return z % chunkSize;
     }
 
-    // Block access
+    // Acesso a blocos
     public byte getBlock(int x, int y, int z) {
         Chunk c = getChunk(x, y, z);
         if (c == null)
@@ -92,7 +92,7 @@ public class VoxelWorld {
         if (c != null) {
             c.set(lx(x), ly(y), lz(z), id);
             c.markDirty();
-            // If on chunk edge, mark neighbor dirty
+            // Se na borda do chunk, marcar vizinho como sujo
             if (lx(x) == 0)
                 markNeighborChunkDirty(x - 1, y, z);
             if (lx(x) == chunkSize - 1)
@@ -128,11 +128,11 @@ public class VoxelWorld {
     public void generateLayers() {
         FastNoiseLite noise = new FastNoiseLite(seed);
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-        noise.SetFrequency(0.01f); // Adjust for terrain scale
+        noise.SetFrequency(0.01f); // Ajustar para escala do terreno
 
         for (int x = 0; x < sizeX; x++) {
             for (int z = 0; z < sizeZ; z++) {
-                // Determine height: base 16 + variation +/- 8
+                // Determinar altura: base 16 + variação +/- 8
                 float noiseVal = noise.GetNoise(x, z);
                 int height = (int) (16 + noiseVal * 8);
 
@@ -140,18 +140,18 @@ public class VoxelWorld {
                     byte id = VoxelPalette.AIR_ID;
                     if (y <= height) {
                         if (y == height) {
-                            id = VoxelPalette.DIRT_ID; // Top: Dirt
+                            id = VoxelPalette.DIRT_ID; // Topo: Terra
                         } else if (y > height - 3) {
-                            id = VoxelPalette.DIRT_ID; // 3 layers of dirt
+                            id = VoxelPalette.DIRT_ID; // 3 camadas de terra
                         } else {
-                            id = VoxelPalette.STONE_ID; // Stone below
+                            id = VoxelPalette.STONE_ID; // Pedra abaixo
                         }
                     }
                     setBlock(x, y, z, id);
                 }
-                // Tree generation
+                // Geração de árvores
                 if (height < sizeY - 6 && x > 2 && x < sizeX - 2 && z > 2 && z < sizeZ - 2) {
-                    // 1% chance for a tree
+                    // 1% de chance de uma árvore
                     if (Math.random() < 0.01) {
                         generateTree(x, height + 1, z);
                     }
@@ -161,36 +161,36 @@ public class VoxelWorld {
     }
 
     private void generateTree(int x, int y, int z) {
-        // Trunk: 4 blocks up
+        // Tronco: 4 blocos para cima
         int trunkHeight = 4;
         for (int i = 0; i < trunkHeight; i++) {
             setBlock(x, y + i, z, VoxelPalette.LOG_ID);
         }
 
-        // Leaves: 3x3 at top 2 layers of trunk, plus 1 on top
+        // Folhas: 3x3 nas 2 camadas superiores do tronco, mais 1 no topo
         int leavesStart = y + 2;
         int leavesEnd = y + trunkHeight; // inclusive of top layer logic
 
-        // Layer 1 (Wide): y + 2
+        // Camada 1 (Larga): y + 2
         for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
-                // Determine shape (circle-ish or square)
+                // Determinar forma (circular ou quadrada)
                 if (Math.abs(dx) == 2 && Math.abs(dz) == 2)
-                    continue; // Skip corners for rounded look
+                    continue; // Ignorar cantos para aspeto arredondado
                 if (dx == 0 && dz == 0)
-                    continue; // Trunk is here
+                    continue; // Tronco está aqui
                 setBlock(x + dx, leavesStart, z + dz, VoxelPalette.LEAVES_ID);
                 setBlock(x + dx, leavesStart + 1, z + dz, VoxelPalette.LEAVES_ID);
             }
         }
 
-        // Top Layer: y + 4 (above trunk)
+        // Camada Superior: y + 4 (acima do tronco)
         setBlock(x, y + trunkHeight, z, VoxelPalette.LEAVES_ID);
         setBlock(x + 1, y + trunkHeight, z, VoxelPalette.LEAVES_ID);
         setBlock(x - 1, y + trunkHeight, z, VoxelPalette.LEAVES_ID);
         setBlock(x, y + trunkHeight, z + 1, VoxelPalette.LEAVES_ID);
         setBlock(x, y + trunkHeight, z - 1, VoxelPalette.LEAVES_ID);
-        // Add a bit more height?
+        // Adicionar um pouco mais de altura?
         setBlock(x, y + trunkHeight + 1, z, VoxelPalette.LEAVES_ID);
     }
 
@@ -214,7 +214,7 @@ public class VoxelWorld {
     }
 
     private void initMaterials() {
-        // Single material for STONE blocks
+        // Material único para blocos de PEDRA
         Texture2D tex = ProcTextures.checker(128, 4, ColorRGBA.Gray, ColorRGBA.DarkGray);
         materials.put(VoxelPalette.STONE_ID, makeLitTex(tex, 0.08f, 16f));
     }
@@ -250,7 +250,7 @@ public class VoxelWorld {
     }
 
     public void buildPhysics(PhysicsSpace space) {
-        // Build per-chunk static rigid bodies instead of a single world body
+        // Construir corpos rígidos estáticos por chunk em vez de um corpo único
         if (space == null)
             return;
         for (int cx = 0; cx < chunkCountX; cx++) {
@@ -420,8 +420,8 @@ public class VoxelWorld {
     }
 
     /**
-     * Rebuilds meshes only for dirty chunks. Call this once per frame in your
-     * update loop.
+     * Reconstrói malhas apenas para chunks sujos. Chame isto uma vez por frame no
+     * loop de update.
      */
     public void rebuildDirtyChunks(PhysicsSpace physicsSpace) {
         int rebuilt = 0;
@@ -442,13 +442,13 @@ public class VoxelWorld {
         if (rebuilt > 0)
             System.out.println("Chunks rebuilt this frame: " + rebuilt);
         if (rebuilt > 0 && physicsSpace != null) {
-            physicsSpace.update(0); // Force physics space to process changes
+            physicsSpace.update(0); // Forçar espaço de física a processar alterações
             System.out.println("Physics space forced update after chunk physics changes.");
         }
     }
 
     /**
-     * Clears the dirty flag on all chunks. Call after initial buildMeshes().
+     * Limpa a flag de sujo em todos os chunks. Chame após buildMeshes() inicial.
      */
     public void clearAllDirtyFlags() {
         for (int cx = 0; cx < chunkCountX; cx++)
@@ -457,7 +457,7 @@ public class VoxelWorld {
                     chunks[cx][cy][cz].clearDirty();
     }
 
-    // simple int3
+    // int3 simples
     public static class Vector3i {
         public final int x, y, z;
 
