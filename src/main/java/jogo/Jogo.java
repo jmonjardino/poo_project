@@ -14,6 +14,7 @@ import jogo.appstate.RenderAppState;
 import jogo.appstate.InteractionAppState;
 import jogo.appstate.AIAppState;
 import jogo.appstate.CraftingAppState;
+import jogo.appstate.PersistenceAppState;
 import jogo.engine.GameRegistry;
 import jogo.gameobject.Wood;
 import jogo.gameobject.item.BreakableItem;
@@ -142,5 +143,9 @@ public class Jogo extends SimpleApplication {
         CraftingAppState crafting = new CraftingAppState(input, player, hud);
         stateManager.attach(crafting);
         interaction.setCraftingAppState(crafting); // Ligar referência para verificação de menu
+
+        // Persistência (F5 Save, F9 Load)
+        PersistenceAppState persistence = new PersistenceAppState(input, player, hud, cam);
+        stateManager.attach(persistence);
     }
 }

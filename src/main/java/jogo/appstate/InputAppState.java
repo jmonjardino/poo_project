@@ -28,6 +28,8 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     private volatile boolean craftRecipe2Requested;
     private volatile boolean craftRecipe3Requested;
     private volatile boolean craftRecipe4Requested;
+    private volatile boolean saveRequested;
+    private volatile boolean loadRequested;
     private float mouseDX, mouseDY;
     private boolean mouseCaptured = true;
 
@@ -64,10 +66,12 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.addMapping("CraftRecipe2", new KeyTrigger(KeyInput.KEY_2));
         im.addMapping("CraftRecipe3", new KeyTrigger(KeyInput.KEY_3));
         im.addMapping("CraftRecipe4", new KeyTrigger(KeyInput.KEY_4));
+        im.addMapping("SaveGame", new KeyTrigger(KeyInput.KEY_F5));
+        im.addMapping("LoadGame", new KeyTrigger(KeyInput.KEY_F9));
 
         im.addListener(this, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight", "Jump", "Sprint", "ToggleMouse",
                 "Break", "Place", "ToggleShading", "Respawn", "Interact", "PrintCoords", "Craft", "CraftRecipe1",
-                "CraftRecipe2", "CraftRecipe3", "CraftRecipe4");
+                "CraftRecipe2", "CraftRecipe3", "CraftRecipe4", "SaveGame", "LoadGame");
         im.addListener(this, "MouseX+", "MouseX-", "MouseY+", "MouseY-");
     }
 
@@ -95,6 +99,8 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.deleteMapping("CraftRecipe2");
         im.deleteMapping("CraftRecipe3");
         im.deleteMapping("CraftRecipe4");
+        im.deleteMapping("SaveGame");
+        im.deleteMapping("LoadGame");
         im.removeListener(this);
     }
 
@@ -166,6 +172,14 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
             case "CraftRecipe4" -> {
                 if (isPressed)
                     craftRecipe4Requested = true;
+            }
+            case "SaveGame" -> {
+                if (isPressed)
+                    saveRequested = true;
+            }
+            case "LoadGame" -> {
+                if (isPressed)
+                    loadRequested = true;
             }
         }
     }
@@ -281,6 +295,18 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     public boolean consumeCraftRecipe4Requested() {
         boolean r = craftRecipe4Requested;
         craftRecipe4Requested = false;
+        return r;
+    }
+
+    public boolean consumeSaveRequested() {
+        boolean r = saveRequested;
+        saveRequested = false;
+        return r;
+    }
+
+    public boolean consumeLoadRequested() {
+        boolean r = loadRequested;
+        loadRequested = false;
         return r;
     }
 }

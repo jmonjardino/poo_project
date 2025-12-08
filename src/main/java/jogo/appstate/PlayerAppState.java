@@ -209,4 +209,17 @@ public class PlayerAppState extends BaseAppState {
     public float getMoveSpeed() {
         return moveSpeed;
     }
+
+    /**
+     * Teleporta o jogador para uma posição específica.
+     * Usado pelo PersistenceAppState ao carregar saves.
+     */
+    public void teleportTo(float x, float y, float z) {
+        if (characterControl != null) {
+            characterControl.setWalkDirection(Vector3f.ZERO);
+            characterControl.warp(new Vector3f(x, y, z));
+            applyViewToCamera();
+            System.out.println("[PlayerAppState] Teleportado para: " + x + ", " + y + ", " + z);
+        }
+    }
 }

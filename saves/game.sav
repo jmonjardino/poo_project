@@ -1,0 +1,14 @@
+# IscteCraft Save File
+# Não editar manualmente!
+
+playerX=174.52899
+playerY=11.739965
+playerZ=155.65627
+playerHealth=100
+selectedSlot=3
+worldSeed=1765214754349
+
+# Inventário: itemType=count
+inv.200=7
+inv.310=1
+inv.400=2
