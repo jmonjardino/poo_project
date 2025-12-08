@@ -74,18 +74,19 @@ public class HudAppState extends BaseAppState {
     }
 
     private void positionStatusText() {
+        // Posicionar no canto inferior direito para não sobrepor o inventário
         SimpleApplication sapp = (SimpleApplication) getApplication();
-        int h = sapp.getCamera().getHeight();
-        float x = 10f;
-        float y = h - 30f;
+        int w = sapp.getCamera().getWidth();
+        float textWidth = statusText.getLineWidth();
+        float x = w - textWidth - 20f; // 20 pixels da margem direita
+        float y = 60f; // 60 pixels do fundo
         statusText.setLocalTranslation(x, y, 0);
     }
 
     private void positionHealthText() {
-        SimpleApplication sapp = (SimpleApplication) getApplication();
-        int h = sapp.getCamera().getHeight();
+        // Posicionar na parte inferior da tela, acima do status
         float x = 10f;
-        float y = h - 50f; // Abaixo do estado
+        float y = 80f; // 80 pixels do fundo (acima do status)
         healthText.setLocalTranslation(x, y, 0);
     }
 

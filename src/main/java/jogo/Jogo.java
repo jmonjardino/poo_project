@@ -117,7 +117,7 @@ public class Jogo extends SimpleApplication {
         zombie.setPosition(sx + 40, ty + 1, sz + 40);
         registry.add(zombie);
 
-        Ally ally = new Ally("Ally", "Guard", 10);
+        Ally ally = new Ally("Ally", "Medic", 5, 10, 5.0); // assistPower=5, healPower=10, protectionPower=5
         ally.setPosition(sx - 40, ty + 1, sz - 40);
         registry.add(ally);
 
@@ -139,6 +139,8 @@ public class Jogo extends SimpleApplication {
         // HUD
         HudAppState hud = new HudAppState(guiNode, assetManager, player);
         stateManager.attach(hud);
-        stateManager.attach(new CraftingAppState(input, player, hud));
+        CraftingAppState crafting = new CraftingAppState(input, player, hud);
+        stateManager.attach(crafting);
+        interaction.setCraftingAppState(crafting); // Ligar referência para verificação de menu
     }
 }

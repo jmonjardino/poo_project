@@ -20,12 +20,18 @@ public class CraftingAppState extends BaseAppState {
         this.hud = hud;
     }
 
+    /** Verifica se o menu de crafting está aberto. */
+    public boolean isOpen() {
+        return open;
+    }
+
     @Override
     protected void initialize(Application app) {
     }
 
     @Override
     public void update(float tpf) {
+        // Apenas processar abertura/fecho do menu (tecla C)
         if (input.consumeCraftRequested()) {
             open = !open;
             if (open)
@@ -33,16 +39,17 @@ public class CraftingAppState extends BaseAppState {
             else
                 hud.showStatus("", 0f);
         }
+        // NÃO consumir teclas 1-4 aqui - delegado ao InteractionAppState
+    }
+
+    /**
+     * Tenta fabricar a receita no índice especificado. Chamado pelo
+     * InteractionAppState.
+     */
+    public void tryCraftByIndex(int idx) {
         if (!open)
-            return;
-        if (input.consumeCraftRecipe1Requested())
-            tryCraft(0);
-        if (input.consumeCraftRecipe2Requested())
-            tryCraft(1);
-        if (input.consumeCraftRecipe3Requested())
-            tryCraft(2);
-        if (input.consumeCraftRecipe4Requested())
-            tryCraft(3);
+            return; // Só fabricar se menu estiver aberto
+        tryCraft(idx);
     }
 
     private String listRecipes() {

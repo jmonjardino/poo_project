@@ -29,6 +29,7 @@ public class InteractionAppState extends BaseAppState {
     private final GameRegistry registry;
     private final PlayerAppState playerAppState;
     private final WorldAppState world;
+    private CraftingAppState craftingAppState; // Referência opcional para verificar estado de crafting
     private float reach = 5.5f;
 
     // Estado para mineração progressiva
@@ -46,6 +47,13 @@ public class InteractionAppState extends BaseAppState {
         this.playerAppState = playerAppState;
     }
 
+    /**
+     * Definir referência ao CraftingAppState para verificar se menu está aberto.
+     */
+    public void setCraftingAppState(CraftingAppState craftingAppState) {
+        this.craftingAppState = craftingAppState;
+    }
+
     @Override
     protected void initialize(Application app) {
     }
@@ -60,19 +68,39 @@ public class InteractionAppState extends BaseAppState {
         Ray ray = new Ray(origin, dir);
         ray.setLimit(reach);
 
-        // 0) Seleção de Slot (1-4) - apenas se não estiver em modo de crafting
-        // (verificação simplificada)
-        if (playerAppState != null) {
-            Player p = playerAppState.getPlayer();
-            if (p != null) {
-                if (input.consumeCraftRecipe1Requested())
-                    p.setSelectedSlot(0);
-                if (input.consumeCraftRecipe2Requested())
-                    p.setSelectedSlot(1);
-                if (input.consumeCraftRecipe3Requested())
-                    p.setSelectedSlot(2);
-                if (input.consumeCraftRecipe4Requested())
-                    p.setSelectedSlot(3);
+        // 0) Teclas 1-4: Selecionar slot OU fabricar (dependendo do estado do crafting)
+        boolean craftingOpen = (craftingAppState != null && craftingAppState.isOpen());
+
+        if (input.consumeCraftRecipe1Requested()) {
+            if (craftingOpen) {
+                craftingAppState.tryCraftByIndex(0);
+            } else if (playerAppState != null && playerAppState.getPlayer() != null) {
+                playerAppState.getPlayer().setSelectedSlot(0);
+                System.out.println("Slot 1 selecionado");
+            }
+        }
+        if (input.consumeCraftRecipe2Requested()) {
+            if (craftingOpen) {
+                craftingAppState.tryCraftByIndex(1);
+            } else if (playerAppState != null && playerAppState.getPlayer() != null) {
+                playerAppState.getPlayer().setSelectedSlot(1);
+                System.out.println("Slot 2 selecionado");
+            }
+        }
+        if (input.consumeCraftRecipe3Requested()) {
+            if (craftingOpen) {
+                craftingAppState.tryCraftByIndex(2);
+            } else if (playerAppState != null && playerAppState.getPlayer() != null) {
+                playerAppState.getPlayer().setSelectedSlot(2);
+                System.out.println("Slot 3 selecionado");
+            }
+        }
+        if (input.consumeCraftRecipe4Requested()) {
+            if (craftingOpen) {
+                craftingAppState.tryCraftByIndex(3);
+            } else if (playerAppState != null && playerAppState.getPlayer() != null) {
+                playerAppState.getPlayer().setSelectedSlot(3);
+                System.out.println("Slot 4 selecionado");
             }
         }
 
