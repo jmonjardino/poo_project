@@ -79,9 +79,7 @@ public class PlayerAppState extends BaseAppState {
         // Renascer na localização recomendada
         respawn();
 
-        // initialize camera
-        cam.setFrustumPerspective(60f, (float) cam.getWidth() / cam.getHeight(), 0.05f, 500f);
-        // inicializar câmara
+        // Inicializar câmara
         cam.setFrustumPerspective(60f, (float) cam.getWidth() / cam.getHeight(), 0.05f, 500f);
         // Olhar ligeiramente para baixo para que o chão seja visível imediatamente
         this.pitch = -0.35f;
@@ -154,11 +152,11 @@ public class PlayerAppState extends BaseAppState {
     }
 
     private Vector3f computeWorldMove(Vector3f inputXZ) {
-        // Build forward and left unit vectors from yaw
+        // Constrói vetores unitários forward e left a partir do yaw
         float sinY = FastMath.sin(yaw);
         float cosY = FastMath.cos(yaw);
-        Vector3f forward = new Vector3f(-sinY, 0, -cosY); // -Z when yaw=0
-        Vector3f left = new Vector3f(-cosY, 0, sinY); // -X when yaw=0
+        Vector3f forward = new Vector3f(-sinY, 0, -cosY); // -Z quando yaw=0
+        Vector3f left = new Vector3f(-cosY, 0, sinY); // -X quando yaw=0
         return left.mult(inputXZ.x).addLocal(forward.mult(inputXZ.z));
     }
 

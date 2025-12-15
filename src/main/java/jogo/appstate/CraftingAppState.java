@@ -55,7 +55,7 @@ public class CraftingAppState extends BaseAppState {
     private String listRecipes() {
         Player p = playerAppState != null ? playerAppState.getPlayer() : null;
         if (p == null)
-            return "Crafting: (No player)";
+            return "Fabrico: (Sem jogador)";
 
         StackingInventory inv = p.getInventory();
         java.util.List<Recipe> all = RecipeBook.getAll();
@@ -71,8 +71,8 @@ public class CraftingAppState extends BaseAppState {
             }
         }
         if (count == 0)
-            return "Crafting: (No resources)";
-        return "Crafting: " + sb.toString();
+            return "Fabrico: (Sem recursos)";
+        return "Fabrico: " + sb.toString();
     }
 
     private void tryCraft(int idx) {
@@ -83,9 +83,9 @@ public class CraftingAppState extends BaseAppState {
         Recipe r = RecipeBook.get(idx);
         boolean ok = CraftingService.craft(inv, r);
         if (ok)
-            hud.showStatus("Crafted " + r.getName() + " x" + r.getOutputQty(), 2.0f);
+            hud.showStatus("Fabricado " + r.getName() + " x" + r.getOutputQty(), 2.0f);
         else
-            hud.showStatus("Cannot craft " + r.getName(), 2.0f);
+            hud.showStatus("Não é possível fabricar " + r.getName(), 2.0f);
     }
 
     @Override

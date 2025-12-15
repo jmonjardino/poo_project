@@ -30,6 +30,7 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     private volatile boolean craftRecipe4Requested;
     private volatile boolean saveRequested;
     private volatile boolean loadRequested;
+    private volatile boolean highscoresRequested;
     private float mouseDX, mouseDY;
     private boolean mouseCaptured = true;
 
@@ -68,10 +69,11 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.addMapping("CraftRecipe4", new KeyTrigger(KeyInput.KEY_4));
         im.addMapping("SaveGame", new KeyTrigger(KeyInput.KEY_F5));
         im.addMapping("LoadGame", new KeyTrigger(KeyInput.KEY_F9));
+        im.addMapping("Highscores", new KeyTrigger(KeyInput.KEY_H));
 
         im.addListener(this, "MoveForward", "MoveBackward", "MoveLeft", "MoveRight", "Jump", "Sprint", "ToggleMouse",
                 "Break", "Place", "ToggleShading", "Respawn", "Interact", "PrintCoords", "Craft", "CraftRecipe1",
-                "CraftRecipe2", "CraftRecipe3", "CraftRecipe4", "SaveGame", "LoadGame");
+                "CraftRecipe2", "CraftRecipe3", "CraftRecipe4", "SaveGame", "LoadGame", "Highscores");
         im.addListener(this, "MouseX+", "MouseX-", "MouseY+", "MouseY-");
     }
 
@@ -101,6 +103,7 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
         im.deleteMapping("CraftRecipe4");
         im.deleteMapping("SaveGame");
         im.deleteMapping("LoadGame");
+        im.deleteMapping("Highscores");
         im.removeListener(this);
     }
 
@@ -180,6 +183,10 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
             case "LoadGame" -> {
                 if (isPressed)
                     loadRequested = true;
+            }
+            case "Highscores" -> {
+                if (isPressed)
+                    highscoresRequested = true;
             }
         }
     }
@@ -307,6 +314,12 @@ public class InputAppState extends BaseAppState implements ActionListener, Analo
     public boolean consumeLoadRequested() {
         boolean r = loadRequested;
         loadRequested = false;
+        return r;
+    }
+
+    public boolean consumeHighscoresRequested() {
+        boolean r = highscoresRequested;
+        highscoresRequested = false;
         return r;
     }
 }

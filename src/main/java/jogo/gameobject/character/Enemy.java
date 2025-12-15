@@ -94,6 +94,6 @@ public class Enemy extends Character implements HasAI {
 
     @Override
     public String toString() {
-        return super.toString() + " Strength: " + strength;
+        return super.toString() + " Força: " + strength;
     }
 }

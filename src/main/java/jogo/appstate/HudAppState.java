@@ -37,7 +37,7 @@ public class HudAppState extends BaseAppState {
         crosshair.setSize(font.getCharSet().getRenderedSize() * 2f);
         guiNode.attachChild(crosshair);
         centerCrosshair();
-        System.out.println("HudAppState initialized: crosshair attached");
+        System.out.println("HudAppState inicializado: mira anexada");
 
         inventoryText = new BitmapText(font, false);
         inventoryText.setSize(font.getCharSet().getRenderedSize());
@@ -97,7 +97,7 @@ public class HudAppState extends BaseAppState {
     private void updateHealthText() {
         if (playerAppState != null && playerAppState.getPlayer() != null) {
             int hp = playerAppState.getPlayer().getHealth();
-            healthText.setText("Health: " + hp);
+            healthText.setText("Vida: " + hp);
             if (hp > 50)
                 healthText.setColor(com.jme3.math.ColorRGBA.Green);
             else if (hp > 20)
@@ -139,19 +139,19 @@ public class HudAppState extends BaseAppState {
 
     private String nameForType(int type) {
         if (type == 100)
-            return "Tool";
+            return "Ferramenta";
         if (type == 200)
-            return "Wood";
+            return "Madeira";
         if (type == 210)
-            return "Planks";
+            return "Tábuas";
         if (type == 220)
-            return "Stick";
+            return "Pau";
         if (type == 300)
-            return "Dirt";
+            return "Terra";
         if (type == 310)
-            return "Workbench";
+            return "Bancada";
         if (type == 400)
-            return "Axe";
+            return "Machado";
         return "Item " + type;
     }
 

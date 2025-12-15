@@ -132,7 +132,7 @@ public class Ally extends Character implements HasAI {
 
     @Override
     public void updateAI(jogo.gameobject.capability.AIContext context) {
-        // Cooldown management
+        // Gestão de cooldown
         if (healCooldown > 0) {
             healCooldown -= context.tpf;
         }
@@ -144,7 +144,7 @@ public class Ally extends Character implements HasAI {
             Vec3 step = context.computeStepTowardsPlayerXZ(getPosition(), stopRange);
             setPosition(getPosition().x + step.x, getPosition().y + step.y, getPosition().z + step.z);
 
-            // Healing logic
+            // Lógica de cura
             if (context.playerRef != null && context.distanceXZ(getPosition()) <= stopRange + 1.0) {
                 if (healCooldown <= 0 && healPower > 0) {
                     context.playerRef.heal(healPower);
@@ -153,7 +153,7 @@ public class Ally extends Character implements HasAI {
             }
         } else if (context.shouldStop(getPosition(), stopRange)) {
             state = AllyState.IDLE;
-            // Also heal if stopped and close
+            // Também cura se parado e próximo
             if (healCooldown <= 0 && healPower > 0 && context.playerRef != null) {
                 context.playerRef.heal(healPower);
                 healCooldown = HEAL_DELAY;
@@ -163,6 +163,6 @@ public class Ally extends Character implements HasAI {
 
     @Override
     public String toString() {
-        return super.toString() + " Role: " + role;
+        return super.toString() + " Papel: " + role;
     }
 }

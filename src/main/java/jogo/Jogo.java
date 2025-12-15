@@ -122,20 +122,7 @@ public class Jogo extends SimpleApplication {
         ally.setPosition(sx - 40, ty + 1, sz - 40);
         registry.add(ally);
 
-        // Pós-processamento: SSAO para sombras de contacto subtis
-        try {
-            FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-            Class<?> ssaoCls = Class.forName("com.jme3.post.ssao.SSAOFilter");
-            Object ssao = ssaoCls.getConstructor(float.class, float.class, float.class, float.class)
-                    .newInstance(2.1f, 0.6f, 0.5f, 0.02f); // raio, intensidade, escala, viés
-            // Adicionar filtro via reflexão para evitar dependência de compilação
-            java.lang.reflect.Method addFilter = FilterPostProcessor.class.getMethod("addFilter",
-                    Class.forName("com.jme3.post.Filter"));
-            addFilter.invoke(fpp, ssao);
-            viewPort.addProcessor(fpp);
-        } catch (Exception e) {
-            System.out.println("SSAO not available (effects module missing?): " + e.getMessage());
-        }
+
 
         // HUD
         HudAppState hud = new HudAppState(guiNode, assetManager, player);

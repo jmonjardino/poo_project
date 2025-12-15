@@ -63,25 +63,23 @@ public class AIContext {
         double dist = Math.sqrt(dx * dx + dz * dz);
         if (dist <= stopRange || dist == 0.0)
             return new Vec3(0f, 0f, 0f);
-        // Initial step towards player
+        // Passo inicial em direção ao jogador
         double step = Math.min(maxStep, Math.max(0.0, dist - stopRange));
         double scale = step / dist;
         float sx = (float) (dx * scale);
         float sz = (float) (dz * scale);
 
-        // Repulsion from neighbors
+        // Repulsão dos vizinhos
         if (neighbors != null) {
             for (jogo.gameobject.GameObject obj : neighbors) {
-                // Ignore self and player (player handled by stopRange, self handled by
-                // identity)
-                // We rely on caller passing 'from' as their own position, but we don't have
-                // 'this' reference here easily.
-                // However, distance to self is 0.
+                // Ignorar self e jogador (jogador tratado pelo stopRange, self tratado por
+                // identidade)
+                // Não temos referência 'this' aqui facilmente, mas distância para self é 0.
                 Vec3 np = obj.getPosition();
                 double d2 = (from.x - np.x) * (from.x - np.x) + (from.z - np.z) * (from.z - np.z);
-                if (d2 > 0.0001 && d2 < 1.0) { // If closer than 1.0 unit (and not self)
+                if (d2 > 0.0001 && d2 < 1.0) { // Se mais próximo que 1.0 unidade (e não é self)
                     double d = Math.sqrt(d2);
-                    double push = (1.0 - d) * 2.0 * tpf; // Strong push back
+                    double push = (1.0 - d) * 2.0 * tpf; // Empurrão forte para trás
                     double px = (from.x - np.x) / d;
                     double pz = (from.z - np.z) / d;
                     sx += px * push;

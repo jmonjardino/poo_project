@@ -8,6 +8,8 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.collision.CollisionResults;
+import com.jme3.audio.AudioNode;
+import com.jme3.audio.AudioData.DataType;
 import jogo.engine.RenderIndex;
 import jogo.engine.GameRegistry;
 import jogo.gameobject.character.Player;
@@ -17,6 +19,7 @@ import jogo.gameobject.item.Stick;
 import jogo.gameobject.item.Axe;
 import jogo.gameobject.Wood;
 import jogo.gameobject.GameObject;
+import jogo.gameobject.character.Enemy;
 import jogo.voxel.VoxelWorld;
 import jogo.voxel.VoxelPalette;
 
@@ -35,6 +38,9 @@ public class InteractionAppState extends BaseAppState {
     // Estado para mineração progressiva
     private jogo.voxel.VoxelWorld.Vector3i lastHitBlock = null;
     private int hitCount = 0;
+
+    // Som de ataque
+    private AudioNode hitSound;
 
     public InteractionAppState(Node rootNode, Camera cam, InputAppState input, RenderIndex renderIndex,
             WorldAppState world, GameRegistry registry, PlayerAppState playerAppState) {
@@ -56,6 +62,17 @@ public class InteractionAppState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
+        // Inicializar som de ataque
+        try {
+            hitSound = new AudioNode(app.getAssetManager(), "Sounds/ducky.mp3", DataType.Buffer);
+            hitSound.setPositional(false); // Volume constante (não espacial)
+            hitSound.setLooping(false);
+            hitSound.setVolume(0.7f);
+            System.out.println("[InteractionAppState] Som de ataque carregado.");
+        } catch (Exception e) {
+            System.err.println("[InteractionAppState] Não foi possível carregar som: " + e.getMessage());
+            hitSound = null;
+        }
     }
 
     @Override
@@ -119,9 +136,9 @@ public class InteractionAppState extends BaseAppState {
                             player.getInventory().add(type, 1);
                             if (registry != null)
                                 registry.remove(item);
-                            System.out.println("Picked item: " + obj.getName());
+                            System.out.println("Item apanhado: " + obj.getName());
                         } catch (RuntimeException e) {
-                            System.out.println("Could not pick item: " + e.getMessage());
+                            System.out.println("Não foi possível apanhar item: " + e.getMessage());
                         }
                     }
                     return;
@@ -129,63 +146,63 @@ public class InteractionAppState extends BaseAppState {
             }
         }
 
-        // 2) Partir (Clique Esquerdo) -> Minar Vóxeis
+        // 2) Atacar Inimigos (Clique Esquerdo em inimigo)
+        // Verifica se clicou num inimigo antes de verificar blocos
         if (input.consumeBreakRequested()) {
-            VoxelWorld vw = world != null ? world.getVoxelWorld() : null;
-            if (vw != null) {
-                vw.pickFirstSolid(cam, reach).ifPresent(hit -> {
-                    VoxelWorld.Vector3i cell = hit.cell;
-                    // Verificar se é o mesmo bloco de antes
-                    if (lastHitBlock == null || cell.x != lastHitBlock.x || cell.y != lastHitBlock.y
-                            || cell.z != lastHitBlock.z) {
-                        lastHitBlock = cell;
-                        hitCount = 0;
-                    }
-                    hitCount++;
+            // Primeiro verificar se acertou num inimigo
+            CollisionResults enemyResults = new CollisionResults();
+            rootNode.collideWith(ray, enemyResults);
 
-                    byte id = vw.getBlock(cell.x, cell.y, cell.z);
-                    int requiredHits = 1;
-                    int dropType = -1;
+            boolean hitEnemy = false;
+            for (int i = 0; i < enemyResults.size(); i++) {
+                Spatial hit = enemyResults.getCollision(i).getGeometry();
+                GameObject obj = findRegistered(hit);
+                if (obj instanceof Enemy enemy) {
+                    // Calcular distância
+                    float distance = enemyResults.getCollision(i).getDistance();
+                    if (distance <= reach) {
+                        // Atacar o inimigo
+                        int damage = 25; // Dano base do jogador
+                        enemy.takeDamage(damage);
 
-                    // Verificar eficiência da ferramenta
-                    Player p = playerAppState != null ? playerAppState.getPlayer() : null;
-                    int heldItem = (p != null) ? p.getInventory().getItemTypeAt(p.getSelectedSlot()) : 0;
-                    boolean isAxe = (heldItem == 400);
-
-                    if (id == VoxelPalette.LOG_ID) {
-                        requiredHits = isAxe ? 2 : 4;
-                        dropType = 200; // Item Madeira
-                    } else if (id == VoxelPalette.DIRT_ID) {
-                        requiredHits = 3;
-                        dropType = 300; // Item Terra
-                    } else if (id == VoxelPalette.STONE_ID) {
-                        requiredHits = 6;
-                    } else if (id == VoxelPalette.LEAVES_ID) {
-                        requiredHits = 1;
-                    }
-
-                    System.out.println("Hit block ID " + id + ": " + hitCount + "/" + requiredHits);
-
-                    if (hitCount >= requiredHits) {
-                        if (vw.breakAt(cell.x, cell.y, cell.z)) {
-                            vw.rebuildDirtyChunks(world.getPhysicsSpace());
-                            playerAppState.refreshPhysics();
-
-                            if (dropType != -1 && playerAppState != null) {
-                                playerAppState.getPlayer().getInventory().add(dropType, 1);
-                                System.out.println("Mined item type: " + dropType);
-                            }
-                            // Reiniciar
-                            hitCount = 0;
-                            lastHitBlock = null;
+                        // Tocar som de ataque
+                        if (hitSound != null) {
+                            hitSound.playInstance();
                         }
+
+                        System.out.println("Atacou " + enemy.getName() + "! HP: " + enemy.getHealth());
+
+                        // Se o inimigo morreu
+                        if (!enemy.isAlive()) {
+                            if (registry != null) {
+                                registry.remove(enemy);
+                            }
+                            // Contabilizar para highscore
+                            if (playerAppState != null && playerAppState.getPlayer() != null) {
+                                playerAppState.getPlayer().incrementEnemiesDefeated();
+                                System.out.println(
+                                        "Inimigo derrotado! Total: " + playerAppState.getPlayer().getEnemiesDefeated());
+                            }
+                        }
+                        hitEnemy = true;
+                        break;
                     }
-                });
+                }
+            }
+
+            // Se não acertou inimigo, tentar minar bloco
+            if (!hitEnemy) {
+                VoxelWorld vw = world != null ? world.getVoxelWorld() : null;
+                if (vw != null) {
+                    mineBlock(vw, ray);
+                }
             }
         }
 
         // 3) Colocar (Clique Direito) -> Colocar Vóxeis
-        if (input.consumePlaceRequested()) {
+        if (input.consumePlaceRequested())
+
+        {
             VoxelWorld vw = world != null ? world.getVoxelWorld() : null;
             Player p = playerAppState != null ? playerAppState.getPlayer() : null;
             if (vw != null && p != null) {
@@ -246,6 +263,60 @@ public class InteractionAppState extends BaseAppState {
         if (item instanceof jogo.gameobject.Dirt)
             return 300;
         return 900;
+    }
+
+    /** Lógica de mineração de blocos. */
+    private void mineBlock(VoxelWorld vw, Ray ray) {
+        vw.pickFirstSolid(cam, reach).ifPresent(hit -> {
+            VoxelWorld.Vector3i cell = hit.cell;
+            // Verificar se é o mesmo bloco de antes
+            if (lastHitBlock == null || cell.x != lastHitBlock.x || cell.y != lastHitBlock.y
+                    || cell.z != lastHitBlock.z) {
+                lastHitBlock = cell;
+                hitCount = 0;
+            }
+            hitCount++;
+
+            byte id = vw.getBlock(cell.x, cell.y, cell.z);
+            int requiredHits = 1;
+            int dropType = -1;
+
+            // Verificar eficiência da ferramenta
+            Player p = playerAppState != null ? playerAppState.getPlayer() : null;
+            int heldItem = (p != null) ? p.getInventory().getItemTypeAt(p.getSelectedSlot()) : 0;
+            boolean isAxe = (heldItem == 400);
+
+            if (id == VoxelPalette.LOG_ID) {
+                requiredHits = isAxe ? 2 : 4;
+                dropType = 200; // Item Madeira
+            } else if (id == VoxelPalette.DIRT_ID) {
+                requiredHits = 3;
+                dropType = 300; // Item Terra
+            } else if (id == VoxelPalette.STONE_ID) {
+                requiredHits = 6;
+            } else if (id == VoxelPalette.LEAVES_ID) {
+                requiredHits = 1;
+            }
+
+            System.out.println("Acertou bloco ID " + id + ": " + hitCount + "/" + requiredHits);
+
+            if (hitCount >= requiredHits) {
+                if (vw.breakAt(cell.x, cell.y, cell.z)) {
+                    vw.rebuildDirtyChunks(world.getPhysicsSpace());
+                    playerAppState.refreshPhysics();
+
+                    if (dropType != -1 && playerAppState != null) {
+                        playerAppState.getPlayer().getInventory().add(dropType, 1);
+                        playerAppState.getPlayer().incrementBlocksMined();
+                        System.out.println("Item minerado tipo: " + dropType + " (Total: "
+                                + playerAppState.getPlayer().getBlocksMined() + ")");
+                    }
+                    // Reiniciar
+                    hitCount = 0;
+                    lastHitBlock = null;
+                }
+            }
+        });
     }
 
     @Override

@@ -31,4 +31,43 @@ public class Player extends Character {
             this.selectedSlot = slot;
         }
     }
+
+    // === Sistema de Pontuação para Highscores ===
+
+    /** Número de blocos minerados pelo jogador. */
+    private int blocksMined = 0;
+
+    /** Número de inimigos derrotados pelo jogador. */
+    private int enemiesDefeated = 0;
+
+    /** Incrementa o contador de blocos minerados. */
+    public void incrementBlocksMined() {
+        blocksMined++;
+    }
+
+    /** Incrementa o contador de inimigos derrotados. */
+    public void incrementEnemiesDefeated() {
+        enemiesDefeated++;
+    }
+
+    /** Devolve o número de blocos minerados. */
+    public int getBlocksMined() {
+        return blocksMined;
+    }
+
+    /** Devolve o número de inimigos derrotados. */
+    public int getEnemiesDefeated() {
+        return enemiesDefeated;
+    }
+
+    /** Calcula e devolve a pontuação total. */
+    public int getScore() {
+        return blocksMined + (enemiesDefeated * 10);
+    }
+
+    /** Reinicia contadores de pontuação. */
+    public void resetScore() {
+        blocksMined = 0;
+        enemiesDefeated = 0;
+    }
 }

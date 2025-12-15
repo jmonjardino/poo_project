@@ -55,9 +55,9 @@ public final class StackingInventory { // Classe final para evitar herança acid
     /** Construtor com capacidade e limite por pilha. */
     public StackingInventory(int capacity, int stackLimit) { // Cria inventário
         if (capacity <= 0)
-            throw new IllegalArgumentException("capacity must be > 0"); // Valida capacidade
+            throw new IllegalArgumentException("capacidade deve ser > 0"); // Valida capacidade
         if (stackLimit <= 0)
-            throw new IllegalArgumentException("stackLimit must be > 0"); // Valida limite de pilha
+            throw new IllegalArgumentException("limite de pilha deve ser > 0"); // Valida limite de pilha
         this.stackLimit = stackLimit; // Guarda limite
         this.slots = new Slot[capacity]; // Aloca array de slots
         for (int i = 0; i < capacity; i++)
@@ -71,13 +71,13 @@ public final class StackingInventory { // Classe final para evitar herança acid
 
     public int getItemTypeAt(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= slots.length)
-            throw new IndexOutOfBoundsException("slotIndex out of range");
+            throw new IndexOutOfBoundsException("índice de slot fora de limites");
         return slots[slotIndex].itemType;
     }
 
     public int getCountAt(int slotIndex) {
         if (slotIndex < 0 || slotIndex >= slots.length)
-            throw new IndexOutOfBoundsException("slotIndex out of range");
+            throw new IndexOutOfBoundsException("índice de slot fora de limites");
         return slots[slotIndex].count;
     }
 
@@ -110,9 +110,9 @@ public final class StackingInventory { // Classe final para evitar herança acid
     /** Adiciona quantidade de um tipo, respeitando pilhas e capacidade. */
     public void add(int itemType, int qty) { // Operação de adicionar
         if (itemType <= 0)
-            throw new IllegalArgumentException("itemType must be > 0"); // Valida tipo
+            throw new IllegalArgumentException("tipo de item deve ser > 0"); // Valida tipo
         if (qty <= 0)
-            throw new InvalidQuantityException("qty must be > 0"); // Valida quantidade
+            throw new InvalidQuantityException("quantidade deve ser > 0"); // Valida quantidade
         int remaining = qty; // Quantidade por inserir
         for (Slot s : slots) { // Primeiro, preencher pilhas existentes
             if (remaining == 0)
@@ -145,9 +145,9 @@ public final class StackingInventory { // Classe final para evitar herança acid
     /** Remove quantidade de um tipo, distribuindo pelos slots. */
     public void remove(int itemType, int qty) { // Operação de remover por tipo
         if (itemType <= 0)
-            throw new IllegalArgumentException("itemType must be > 0"); // Valida tipo
+            throw new IllegalArgumentException("tipo de item deve ser > 0"); // Valida tipo
         if (qty <= 0)
-            throw new InvalidQuantityException("qty must be > 0"); // Valida quantidade
+            throw new InvalidQuantityException("quantidade deve ser > 0"); // Valida quantidade
         int available = getCount(itemType); // Total disponível
         if (available < qty)
             throw new ItemNotFoundException(
@@ -170,14 +170,14 @@ public final class StackingInventory { // Classe final para evitar herança acid
     /** Remove quantidade num índice de slot específico. */
     public void removeAt(int slotIndex, int qty) { // Remoção direta por slot
         if (slotIndex < 0 || slotIndex >= slots.length)
-            throw new IndexOutOfBoundsException("slotIndex out of range"); // Valida índice
+            throw new IndexOutOfBoundsException("índice de slot fora de limites"); // Valida índice
         if (qty <= 0)
-            throw new InvalidQuantityException("qty must be > 0"); // Valida quantidade
+            throw new InvalidQuantityException("quantidade deve ser > 0"); // Valida quantidade
         Slot s = slots[slotIndex]; // Obtém slot
         if (s.isEmpty())
-            throw new ItemNotFoundException("slot is empty"); // Erro se vazio
+            throw new ItemNotFoundException("slot está vazio"); // Erro se vazio
         if (qty > s.count)
-            throw new InvalidQuantityException("qty exceeds slot count"); // Erro se excede
+            throw new InvalidQuantityException("quantidade excede contagem do slot"); // Erro se excede
         s.count -= qty; // Atualiza contagem
         if (s.count == 0)
             s.itemType = 0; // Liberta slot
